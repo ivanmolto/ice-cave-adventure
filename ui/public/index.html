@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Skeleton</title>
+
+    <link href="index.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="dappConstants.js"></script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <h1>Welcome to the Skeleton Agoric Dapp</h1>
+
+    <h2>Try some encouragement</h2>
+
+    <p>I've encouraged <span id="numEncouragements">0</span> times since I was born.</p>
+    <form onsubmit="return false">
+      <p><input type="text" id="inputName" placeholder="Your name" />
+        <input type="submit" value="Encourage Me" id="encourageMe" disabled="disabled" /></p>
+    </form>
+
+    <h2>Toss some change, take some change</h2>
+
+    <form onsubmit="return false">
+      <p>Send <input type="number" min="0" size="6" length="4" id="inputAmount" value="0" />
+        <select id="brands" disabled="disabled">
+          <option><i>some brand</i></option>
+        </select> from <select id="srcPurse" disabled="disabled">
+        <option value="">the change jar</option>
+      </select>
+      into <select id="dstPurse" disabled="disabled">
+        <option value="">the change jar</option>
+      </select><input type="submit" disabled="disabled" value="Add Proposal to Wallet" /></p>
+    </form>
+ 
+    <hr />
+    <div class="horizontal">
+      <div class="status">
+        Agoric wallet: <span id="wallet-status">Unknown</span>
+      </div>
+      <div class="status">
+        API server: <span id="api-status">Unknown</span>
+      </div>
+    </div>
+    <div class="vertical">
+      <div>
+        <label for="debug"><input type="checkbox" id="debug" /> Debug mode</label>
+      </div>
+      <div id="messages" class="messages"></div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
