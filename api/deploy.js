@@ -1,13 +1,26 @@
+// @ts-check
 // Agoric Dapp api deployment script
 
+/**
+ * @typedef {Object} DeployPowers The special powers that agoric deploy gives us
+ * @property {(path: string) => { moduleFormat: string, source: string }} bundleSource
+ * @property {(path: string) => string} pathResolve
+ */
+
+/**
+ * @param {any} homeP A promise for the REPL home
+ * @param {DeployPowers} powers
+ */
 export default async function deployApi(homeP, { bundleSource, pathResolve }) {
   let overrideInstanceRegKey;
   const dc = `${process.cwd()}/dappConstants.js`;
   let dappConstants;
   try {
+    // eslint-disable-next-line import/no-dynamic-require, global-require
     require(dc);
-    dappConstants = __DAPP_CONSTANTS__;
-    overrideInstanceRegKey = __DAPP_CONSTANTS__.CONTRACT_ID;
+    // eslint-disable-next-line no-underscore-dangle
+    dappConstants = globalThis.__DAPP_CONSTANTS__;
+    overrideInstanceRegKey = dappConstants.CONTRACT_ID;
   } catch (e) {
     console.log(`Proceeeding with defaults; cannot load ${dc}:`, e.message);
   }
@@ -29,7 +42,7 @@ export default async function deployApi(homeP, { bundleSource, pathResolve }) {
   const { issuerKeywordRecord } = instance;
   const brands = {};
   await Promise.all(Object.entries(brandRegKeys).map(
-    async ([keyword, brandRegKey]) => {
+    async ([keyword, _brandRegKey]) => {
       brands[keyword] = await issuerKeywordRecord[keyword]~.getBrand();
     }));
   const adminSeats = {

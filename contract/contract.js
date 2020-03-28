@@ -1,19 +1,11 @@
+// @ts-check
 /* eslint-disable no-use-before-define */
 import harden from '@agoric/harden';
 import { assert, details } from '@agoric/assert';
 import makePromise from '@agoric/make-promise';
 
 /**
- * The SimpleExchange uses Asset and Price as its keywords. In usage,
- * they're somewhat symmetrical. Participants will be buying or
- * selling in both directions.
- *
- * { give: { Asset: simoleans(5) }, want: { Price: quatloos(3) } }
- * { give: { Price: quatloos(8) }, want: { Asset: simoleans(3) } }
- *
- * The Asset is treated as an exact amount to be exchanged, while the
- * Price is a limit that may be improved on. This simple exchange does
- * not partially fill orders.
+ * This contract does a few interesting things.
  */
 export const makeContract = harden(zoe => {
   let count = 0;

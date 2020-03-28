@@ -1,3 +1,4 @@
+// @ts-check
 // Generic Agoric Dapp contract deployment script
 // NOTE: YOUR CONTRACT-SPECIFIC INITIALIZATION is in install-contract.js
 import fs from 'fs';
@@ -7,6 +8,17 @@ import fs from 'fs';
 // committee.
 // TODO: improve this comment. https://github.com/Agoric/agoric-sdk/issues/608
 
+/**
+ * @typedef {Object} DeployPowers The special powers that agoric deploy gives us
+ * @property {(path: string) => { moduleFormat: string, source: string }} bundleSource
+ * @property {(path: string) => string} pathResolve
+ */
+
+/**
+ * 
+ * @param {*} homeP 
+ * @param {DeployPowers} powers
+ */
 export default async function deployContract(homeP, { bundleSource, pathResolve }) {
 
   const [

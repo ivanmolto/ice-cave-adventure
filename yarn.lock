@@ -774,6 +774,15 @@ axobject-query@^2.0.2:
     "@babel/runtime" "^7.7.4"
     "@babel/runtime-corejs3" "^7.7.4"
 
+babel-eslint@>=11.0.0-beta.2:
+  version "11.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/babel-eslint/-/babel-eslint-11.0.0-beta.2.tgz#de1f06795aa0d8cedcf6ac943e63056f5b4a7048"
+  integrity sha512-D2tunrOu04XloEdU2XVUminUu25FILlGruZmffqH5OSnLDhCheKNvUoM1ihrexdUvhizlix8bjqRnsss4V/UIQ==
+  dependencies:
+    eslint-scope "5.0.0"
+    eslint-visitor-keys "^1.1.0"
+    semver "^6.3.0"
+
 balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
@@ -1217,10 +1226,10 @@ eslint-config-jessie@0.0.3:
   dependencies:
     requireindex "^1.2.0"
 
-eslint-config-jessie@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/eslint-config-jessie/-/eslint-config-jessie-0.0.4.tgz#00845c81f8bc1c1d1c2386d5fda3f165532ed8ae"
-  integrity sha512-jmWq+A7iAKev6nfqpQj/HqC+SMqje7r1HzXqqbInzKOO1OEd9b9MtLJaIe1VpqftS5kDztSubSc9ygzUZCgGaA==
+eslint-config-jessie@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/eslint-config-jessie/-/eslint-config-jessie-0.0.6.tgz#429de65983cdfcb161c62a5169605ded6130487b"
+  integrity sha512-L19U3+qWJdhdUjxW7NkkB9X+343MwUB81dplbxwcbBCvrWA8WwmiWYww0g23j4Oz/Vy8KmdW1cyW5Ii6s5IJzQ==
 
 eslint-config-prettier@^6.0.0, eslint-config-prettier@^6.9.0:
   version "6.9.0"
@@ -1244,6 +1253,14 @@ eslint-module-utils@^2.4.1:
   dependencies:
     debug "^2.6.9"
     pkg-dir "^2.0.0"
+
+eslint-plugin-eslint-comments@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-comments/-/eslint-plugin-eslint-comments-3.1.2.tgz#4ef6c488dbe06aa1627fea107b3e5d059fc8a395"
+  integrity sha512-QexaqrNeteFfRTad96W+Vi4Zj1KFbkHHNMMaHZEYcovKav6gdomyGzaxSDSL3GoIyUOo078wRAdYlu1caiauIQ==
+  dependencies:
+    escape-string-regexp "^1.0.5"
+    ignore "^5.0.5"
 
 eslint-plugin-import@^2.18.2, eslint-plugin-import@^2.20.0:
   version "2.20.0"
@@ -1305,7 +1322,7 @@ eslint-plugin-react@^7.18.0:
     prop-types "^15.7.2"
     resolve "^1.14.2"
 
-eslint-scope@^5.0.0:
+eslint-scope@5.0.0, eslint-scope@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/eslint-scope/-/eslint-scope-5.0.0.tgz#e87c8887c73e8d1ec84f1ca591645c358bfc8fb9"
   integrity sha512-oYrhJW7S0bxAFDvWqzvMPRm6pcgcnWc4QnofCAqRTRfQC0JcwenzGglTtsLyIuuWFfkqDG9vz67cnttSd53djw==
@@ -1719,6 +1736,11 @@ ignore@^4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-4.0.6.tgz#750e3db5862087b4737ebac8207ffd1ef27b25fc"
   integrity sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
+
+ignore@^5.0.5:
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.1.4.tgz#84b7b3dbe64552b6ef0eca99f6743dbec6d97adf"
+  integrity sha512-MzbUSahkTW1u7JpKKjY7LCARd1fU5W2rLdxlM4kdkayuCwZImjkpluF9CM1aLewYJguPDqewLam18Y6AU69A8A==
 
 import-fresh@^3.0.0:
   version "3.2.1"

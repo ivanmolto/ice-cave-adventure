@@ -1,3 +1,4 @@
+// @ts-check
 import harden from '@agoric/harden';
 
 const CONTRACT_NAME = 'skeleton';
@@ -6,9 +7,13 @@ const CONTRACT_NAME = 'skeleton';
 //
 // Notably, it interacts with the contract to prepopulate some
 // details.
+
+/**
+ * @param {Object.<string, any>} powers
+ */
 export default harden(({ wallet, zoe, scratch, registrar }) => {
   return harden({
-    async initInstance({ source, moduleFormat }, now = Date.now()) {
+    async initInstance({ source, moduleFormat }, _now = Date.now()) {
       const installationHandle = await zoe~.install(source, moduleFormat);
 
       // =====================
