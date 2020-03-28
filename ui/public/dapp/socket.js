@@ -1,3 +1,4 @@
+// @ts-check
 /* globals window, WebSocket */
 
 import dappConstants from './constants.js';
@@ -17,16 +18,31 @@ function getWebSocketEndpoint(endpoint) {
     url = new URL(endpoint, BRIDGE_URL || window.origin);
   }
   url.protocol = url.protocol.replace(/^http/, 'ws');
-  return url;
+  return url.href;
 }
+
+/**
+ * @typedef {Object} SocketHandler
+ * @property {() => void} [onConnect]
+ * @property {(msg: string) => void} [onMessage]
+ * @property {() => void} [onDisconnect]
+ */
 
 const walletBridgeId = 'walletBridgeIFrame';
 let walletLoaded = false;
 const connectSubscriptions = new Set();
 const messageSubscriptions = new Set();
+let initializedIframe = false;
+
+/**
+ * Make a new "socket", whether WebSocket or postMessage bridge.
+ * 
+ * @param {SocketHandler} handler
+ * @param {string} endpoint 
+ */
 function createSocket({ onConnect, onDisconnect, onMessage }, endpoint) {
   if (endpoint === '/private/wallet-bridge') {
-    let ifr = document.getElementById(walletBridgeId);
+    let ifr = /** @type {HTMLIFrameElement} */ (document.getElementById(walletBridgeId));
     if (!ifr) {
       ifr = document.createElement('iframe');
       ifr.id = walletBridgeId;
@@ -34,6 +50,9 @@ function createSocket({ onConnect, onDisconnect, onMessage }, endpoint) {
       ifr.setAttribute('height', '0');
       ifr.setAttribute('style', 'display: none');
       document.body.appendChild(ifr);
+    }
+    if (!initializedIframe) {
+      initializedIframe = true;
       window.addEventListener('message', ev => {
         // console.log('dapp ui got', ev);
         if (ev.data && ev.data.type === 'walletBridgeLoaded') {
@@ -50,7 +69,7 @@ function createSocket({ onConnect, onDisconnect, onMessage }, endpoint) {
         }
       });
     }
-    ifr.src = '/agoric-wallet.html';
+    ifr.src = 'dapp/agoric-wallet.html';
     if (onMessage) {
       messageSubscriptions.add(onMessage);
     }
@@ -71,7 +90,7 @@ function createSocket({ onConnect, onDisconnect, onMessage }, endpoint) {
         for (const sub of messageListeners.keys()) {
           messageSubscriptions.delete(sub);
         }
-        let ifr = document.getElementById(walletBridgeId);
+        let ifr = /** @type {HTMLIFrameElement} */ (document.getElementById(walletBridgeId));
         if (ifr) {
           ifr.src = '';
         }
@@ -130,6 +149,12 @@ function getActiveSocket(endpoint) {
   return endpointToSocket.get(endpoint);
 }
 
+/**
+ * Start a given socket connection.
+ * 
+ * @param {SocketHandler} socketListeners 
+ * @param {*} endpoint 
+ */
 export function activateSocket(socketListeners = {}, endpoint = '/private/wallet-bridge') {
   if (getActiveSocket(endpoint)) return;
   createSocket(socketListeners, endpoint);

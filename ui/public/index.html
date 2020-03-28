@@ -24,9 +24,9 @@
     <h2>Toss some change, take some change</h2>
 
     <form onsubmit="return false">
-      <p>Send <input type="number" min="0" size="6" length="4" id="inputAmount" value="0" />
+      <p>Send <input type="number" min="0" size="6" length="4" id="inputAmount" value="1" />
         <select id="brands" disabled="disabled">
-          <option><i>some brand</i></option>
+          <option value="remove();"><i>no brands loaded</i></option>
         </select> from <select id="srcPurse" disabled="disabled">
         <option value="">the change jar</option>
       </select>
