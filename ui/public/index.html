@@ -11,25 +11,30 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
 
-    <h1>Welcome to the Encouragement Agoric Dapp</h1>
+    <h2>Do you know you're great?</h2>
 
-    <p>I've encouraged <span id="numEncouragements">0</span> times since I was born.</p>
+    <p>Everybody could use a little encouragement now and then.  Fill out your name below, choose your options, and then hit "Encourage Me!"</p>
+
     <form onsubmit="return false">
-      <p><input type="submit" value="Encourage" id="encourageMe" disabled="disabled" />
-        <input type="text" id="inputName" placeholder="your name" />!
-      </p>
-    
-      <p><label for="giveATip"><input type="checkbox" id="giveATip"/> and tip </label>
+      <p>
+        Encourage <input type="text" id="inputName" placeholder="your name" />, and receive encouragement to <select id="encouragementPurse" disabled="disabled">
+          <option value="">display only</option>
+        </select><br />
+        <label for="forFree"><input type="radio" id="forFree" value="free" checked="checked" name="tipKind" />
+          for free</label><br />
+        <label for="forTip"><input type="radio" id="forTip" value="tip" name="tipKind" />
+          for a tip of</label>
         <input type="number" min="0" size="6" length="4" id="inputAmount" value="1" disabled="disabled" />
         <select id="brands" disabled="disabled">
           <option value="remove()"><i>no issuers</i></option>
         </select> from <select id="tipPurse" disabled="disabled">
           <option value="remove()">no purse</option>
-        </select>
-        to receive verified encouragment to
-        <select id="encouragementPurse" disabled="disabled">
-          <option value="remove()">no purse</option>
-        </select>
+        </select></label>
+      </p>
+
+      <input type="submit" value="Encourage Me!" id="encourageMe" disabled="disabled" />
+
+      <p><i>I've encouraged <span id="numEncouragements">0</span> times since I was born.</i></p>
     </form>
  
     <hr />

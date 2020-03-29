@@ -72,7 +72,14 @@ const updateOptions = (key, existing, currents, names, selects) => {
       existing.splice(j, 1);
     } else {
       const current = currents[i];
-      const newText = `${current[key]}`;
+      let newText;
+      switch (key) {
+        case 'pursePetname':
+          newText = `${current[key]} (${current.extent} ${current.issuerPetname})`
+          break;
+        default: 
+          newText = `${current[key]}`;
+      }
       if (c < 0) {
         // Haven't got yet, so insert.
         const value = current[key];

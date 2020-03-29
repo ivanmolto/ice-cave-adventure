@@ -88,7 +88,7 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
     // TODO: This is where you could call any functions from the initial
     // (privately-held) seat that the Zoe contract creates.
     E(adminSeat).setMessageTemplate(
-      ['Hello ', '$name', `, ${instanceRegKey} tells me you're doing a great job!`]);
+      ['Hey ', '$name', `, you sure know how to use this Dapp!`]);
   
     getInstanceP(instanceRegKey)
       .then(({ publicAPI }) => handleNotification(instanceRegKey, publicAPI));

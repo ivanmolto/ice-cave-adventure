@@ -49,6 +49,7 @@ export default async function main() {
   };
 
   const $encourageMe = /** @type {HTMLInputElement} */ (document.getElementById('encourageMe'));
+  const $numEncouragements = /** @type {HTMLInputElement} */ (document.getElementById('numEncouragements'));
   const $inputName = /** @type {HTMLInputElement} */ (document.getElementById('inputName'));
 
   await Promise.all([
@@ -61,6 +62,9 @@ export default async function main() {
         instanceRegKey: INSTANCE_REGKEY,
         type: 'encouragement/subscribeNotifications',
       });
+
+      // FIXME: Make this real.
+      // $numEncouragements.innerText = '16';
 
       $encourageMe.removeAttribute('disabled');
       $encourageMe.addEventListener('click', () => {
