@@ -24,7 +24,7 @@ export default async function deployContract(homeP, { bundleSource, pathResolve 
     installBundle,
     contractBundle,
   ] = await Promise.all([
-    bundleSource(pathResolve(`./scripts/custom-deploy.js`)),
+    bundleSource(pathResolve(`./init/custom-deploy.js`)),
     bundleSource(pathResolve(`./src/contract.js`)),
   ]);
 

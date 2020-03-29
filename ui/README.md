@@ -1,6 +1,6 @@
 # Encouragement Demo
 
-## Running the DApp frentend
+## Running the Dapp frentend
 
 From the project directory, run:
 
