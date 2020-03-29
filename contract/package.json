@@ -1,8 +1,8 @@
 {
-  "name": "dapp-skeleton-contract",
+  "name": "dapp-encouragement-contract",
   "version": "0.1.0",
   "private": true,
-  "description": "Contract for the dapp-skeleton Agoric Dapp",
+  "description": "Contract for the dapp-encouragement Agoric Dapp",
   "scripts": {
     "build": "exit 0",
     "test": "tape -r esm 'test/**/*.js'",

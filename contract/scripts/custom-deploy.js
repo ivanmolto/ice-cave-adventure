@@ -1,7 +1,7 @@
 // @ts-check
 import harden from '@agoric/harden';
 
-const CONTRACT_NAME = 'skeleton';
+const CONTRACT_NAME = 'encouragement';
 
 // This initInstance function is specific to the contract.
 //

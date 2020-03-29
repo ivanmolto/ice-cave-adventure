@@ -56,7 +56,7 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
 
     const fail = e => {
       const obj = {
-        type: 'skeleton/encouragedError',
+        type: 'encouragement/encouragedError',
         data: e && e.message || e,
       };
       sendToSubscribers(obj);
@@ -65,7 +65,7 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
     const doOneNotification = ({ changed, ...rest }) => {
       // Publish to our subscribers.
       const obj = {
-        type: 'skeleton/encouragedResponse',
+        type: 'encouragement/encouragedResponse',
         data: rest,
       };
       sendToSubscribers(obj);
@@ -128,25 +128,25 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
         async onMessage(obj, { channelHandle } = {}) {
           // These are messages we receive from either POST or WebSocket.
           switch (obj.type) {
-            case 'skeleton/ping':
+            case 'encouragement/ping':
               return harden({
-                type: 'skeleton/pingResponse',
+                type: 'encouragement/pingResponse',
                 message: obj.message,
               });
 
-            case 'skeleton/getEncouragement': {
+            case 'encouragement/getEncouragement': {
               let { instanceRegKey, name } = obj;
               instanceRegKey = coerceInstanceRegKey(instanceRegKey);
               const { publicAPI } = await getInstanceP(instanceRegKey);
 
               return harden({
-                type: 'skeleton/getEncouragementResponse',
+                type: 'encouragement/getEncouragementResponse',
                 instanceRegKey,
                 data: await E(publicAPI).getEncouragement(name),
               });
             }
 
-            case 'skeleton/subscribeNotifications': {
+            case 'encouragement/subscribeNotifications': {
               let { instanceRegKey } = obj;
               instanceRegKey = coerceInstanceRegKey(instanceRegKey);
 
@@ -161,7 +161,7 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
 
               if (subs.has(instanceRegKey)) {
                 return harden({
-                  type: 'skeleton/subscribeNotificationsResponse',
+                  type: 'encouragement/subscribeNotificationsResponse',
                   data: 'already',
                 });
               }
@@ -170,7 +170,7 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
               ensureNotifications(instanceRegKey);
 
               return harden({
-                type: 'skeleton/subscribeNotificationsResponse',
+                type: 'encouragement/subscribeNotificationsResponse',
                 data: true,
               });
             }

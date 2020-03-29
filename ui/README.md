@@ -1,4 +1,4 @@
-# Skeleton Demo
+# Encouragement Demo
 
 ## Running the DApp frentend
 

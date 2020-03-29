@@ -1,7 +1,7 @@
 {
-  "name": "@agoric/dapp-skeleton-agservers",
+  "name": "@agoric/dapp-encouragement-agservers",
   "version": "0.0.1",
-  "description": "Agoric server instances for dapp-skeleton",
+  "description": "Agoric server instances for dapp-encouragement",
   "private": true,
   "scripts": {
     "build": "exit 0",

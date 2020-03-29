@@ -1,20 +1,24 @@
 // @ts-check
 import dappConstants from '../lib/constants.js';
-import { connect, BRIDGE_ENDPOINT } from './connect.js';
-import { walletUpdatePurses } from './wallet.js';
+import { connect } from './connect.js';
+import { walletUpdatePurses, flipSelectedBrands } from './wallet.js';
 
 const { INSTANCE_REGKEY } = dappConstants;
 
 /**
  * @type {Object.<string, HTMLSelectElement>}
  */
-const options = {
+const selects = {
   $brands: /** @type {HTMLSelectElement} */ (document.getElementById('brands')),
-  $srcPurse: /** @type {HTMLSelectElement} */ (document.getElementById('srcPurse')),
-  $dstPurse: /** @type {HTMLSelectElement} */ (document.getElementById('dstPurse')),
+  $tipPurse: /** @type {HTMLSelectElement} */ (document.getElementById('tipPurse')),
+  $encouragementPurse: /** @type {HTMLSelectElement} */ (document.getElementById('encouragementPurse')),
 };
 
 export default async function main() {
+  selects.$brands.addEventListener('change', () => {
+    flipSelectedBrands(selects);
+  });
+  
   /**
    * @param {{ type: string; data: any; }} obj
    */
@@ -23,8 +27,12 @@ export default async function main() {
       case 'walletUpdatePurses': {
         const purses = JSON.parse(obj.data);
         console.log('got purses', purses);
-        walletUpdatePurses(purses, options);
+        walletUpdatePurses(purses, selects);
         break;
+      }
+      case 'walletURL': {
+       // FIXME: Change the anchor href to URL.
+       break;
       }
     }
   };
@@ -34,7 +42,7 @@ export default async function main() {
    */
   const apiRecv = obj => {
     switch (obj.type) {
-      case 'skeleton/getEncouragementResponse':
+      case 'encouragement/getEncouragementResponse':
         alert(`Encourager says: ${obj.data}`);
         break;
     }
@@ -51,7 +59,7 @@ export default async function main() {
     connect('api', apiRecv).then(apiSend => {
       apiSend({
         instanceRegKey: INSTANCE_REGKEY,
-        type: 'skeleton/subscribeNotifications',
+        type: 'encouragement/subscribeNotifications',
       });
 
       $encourageMe.removeAttribute('disabled');
@@ -63,7 +71,7 @@ export default async function main() {
         }
         apiSend({
           instanceRegKey: INSTANCE_REGKEY,
-          type: 'skeleton/getEncouragement',
+          type: 'encouragement/getEncouragement',
           name,
         });
       });

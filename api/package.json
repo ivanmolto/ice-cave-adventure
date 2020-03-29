@@ -1,8 +1,8 @@
 {
-  "name": "@agoric/dapp-skeleton-api",
+  "name": "@agoric/dapp-encouragement-api",
   "private": true,
   "version": "0.1.0",
-  "description": "dapp-skeleton Agoric Dapp web server handler",
+  "description": "dapp-encouragement Agoric Dapp web server handler",
   "scripts": {
     "build": "exit 0",
     "test": "tape -r esm 'test/**/*.js'",

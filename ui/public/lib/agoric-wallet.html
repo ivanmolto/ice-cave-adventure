@@ -7,19 +7,23 @@
     <p>Internal to this dApp.  No user-servicable parts.</p>
     <iframe id="ifr"></iframe>
     <script type="text/javascript">
-      const localAgoricURL = 'https://local.agoric.com/?append=/wallet-bridge.html';
+      const localAgoricURL = 'https://local.agoric.com/?append=/wallet';
       const localAgoricOrigin = new URL(localAgoricURL).origin;
       const walletQueue = [];
-      let walletOrigin;
-      let walletURL;
+      let bridgeOrigin;
+      let bridgeURL;
       function fromFrame(ev) {
         if (ev.origin === localAgoricOrigin) {
-          walletURL = ev.data;
+          const walletURL = ev.data;
 
           console.log('found Agoric wallet', walletURL);
-          walletOrigin = new URL(walletURL).origin;
-          console.log('Agoric wallet origin', walletOrigin);
-          ifr.src = walletURL;
+          if (window.parent !== window) {
+            window.parent.postMessage({ type: 'walletURL', walletURL });
+          }
+          bridgeURL = `${walletURL}-bridge.html`;
+          bridgeOrigin = new URL(bridgeURL).origin;
+          console.log('Agoric wallet origin', bridgeOrigin);
+          ifr.src = bridgeURL;
 
           ifr.onload = () => {
             const loadedMessage = { type: 'walletBridgeLoaded' };
@@ -27,10 +31,10 @@
               window.parent.postMessage(loadedMessage, window.origin);
             }
             while (walletQueue.length) {
-              ifr.contentWindow.postMessage(walletQueue.shift(), walletOrigin);
+              ifr.contentWindow.postMessage(walletQueue.shift(), bridgeOrigin);
             }
           };
-        } else if (ev.origin === walletOrigin) {
+        } else if (ev.origin === bridgeOrigin) {
           // console.log('from wallet', ev.data);
           if (window.parent !== window) {
             window.parent.postMessage(ev.data, window.origin);
@@ -44,10 +48,10 @@
         }
 
         // console.log('from dapp', ev.data);
-        if (walletOrigin === undefined || ifr.src !== walletURL) {
+        if (bridgeOrigin === undefined || ifr.src !== bridgeURL) {
           walletQueue.push(ev.data);
         } else {
-          ifr.contentWindow.postMessage(ev.data, walletOrigin);
+          ifr.contentWindow.postMessage(ev.data, bridgeOrigin);
         }
       }
 

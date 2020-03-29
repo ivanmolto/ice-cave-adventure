@@ -11,8 +11,21 @@ export const makeContract = harden(zoe => {
   let count = 0;
   let messageTemplate = ['Hello, ', '$name', `, you're doing great!`];
 
+  // Implement simple notifications for the contract state.
+  // A caller of getNotification is notified that the state
+  // has changed when the 'changed' promise resolves.
+  // They then can call getNofication again to get the new
+  // state and a new 'changed' promise.
   let changed = makePromise();
+  const getNotification = () => ({
+    changed: changed.p,
+    messageTemplate,
+    count,
+  });
+
   const updateNotification = () => {
+    // Resolve the old changed promise, and create a new
+    // one.
     changed.res();
     changed = makePromise();
   };
@@ -49,12 +62,6 @@ export const makeContract = harden(zoe => {
     const { invite } = zoe.makeInvite(seat);
     return invite;
   };
-
-  const getNotification = () => ({
-    changed: changed.p,
-    messageTemplate,
-    count,
-  });
 
   return harden({
     invite: makeAdminInvite(),
