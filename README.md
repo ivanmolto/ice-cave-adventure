@@ -18,3 +18,6 @@ and after we click the "Encourage Me!" button:
 
 ![Screenshot After Encouragement](readme-assets/after.png)
 
+## TODO
+
+Things we need to fix are listed in [the Github issues for this repository](https://github.com/Agoric/dapp-encouragement/issues).

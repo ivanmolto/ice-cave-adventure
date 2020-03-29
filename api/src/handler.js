@@ -1,3 +1,4 @@
+// @ts-check
 import harden from '@agoric/harden';
 import { E } from '@agoric/eventual-send';
 
@@ -43,20 +44,24 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
   // Here's how you could implement a notification-based
   // publish/subscribe.
   const subscribers = new Map();
+  const lastPublished = new Map();
   function handleNotification(instanceRegKey, publicAPI) {
     let subs = subscribers.get(instanceRegKey);
     if (!subs) {
-      subs = new Set();;
+      subs = new Set();
       subscribers.set(instanceRegKey, subs);
     }
 
-    const sendToSubscribers = obj =>
+    const sendToSubscribers = obj => {
+      lastPublished.set(instanceRegKey, obj);
       E(http).send(obj, [...subs.keys()])
         .catch(e => console.error('cannot send for', instanceRegKey, e));
+    };
 
     const fail = e => {
       const obj = {
         type: 'encouragement/encouragedError',
+        instanceRegKey,
         data: e && e.message || e,
       };
       sendToSubscribers(obj);
@@ -66,6 +71,7 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
       // Publish to our subscribers.
       const obj = {
         type: 'encouragement/encouragedResponse',
+        instanceRegKey,
         data: rest,
       };
       sendToSubscribers(obj);
@@ -128,12 +134,6 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
         async onMessage(obj, { channelHandle } = {}) {
           // These are messages we receive from either POST or WebSocket.
           switch (obj.type) {
-            case 'encouragement/ping':
-              return harden({
-                type: 'encouragement/pingResponse',
-                message: obj.message,
-              });
-
             case 'encouragement/getEncouragement': {
               let { instanceRegKey, name } = obj;
               instanceRegKey = coerceInstanceRegKey(instanceRegKey);
@@ -154,23 +154,37 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
                 throw Error(`Channel is not set for ${instanceRegKey} subscription`);
               }
 
-              const subs = activeChannels.get(channelHandle);
-              if (!subs) {
+              const instances = activeChannels.get(channelHandle);
+              if (!instances) {
                 throw Error(`Subscriptions not initialised for channel ${channelHandle}`);
               }
 
-              if (subs.has(instanceRegKey)) {
+              if (instances.has(instanceRegKey)) {
                 return harden({
                   type: 'encouragement/subscribeNotificationsResponse',
+                  instanceRegKey,
                   data: 'already',
                 });
               }
 
-              subs.add(instanceRegKey);
               ensureNotifications(instanceRegKey);
+
+              instances.add(instanceRegKey);
+              let subs = subscribers.get(instanceRegKey);
+              if (!subs) {
+                subs = new Set();
+                subscribers.set(instanceRegKey, subs);
+              }
+              subs.add(channelHandle);
+
+              const last = lastPublished.get(instanceRegKey);
+              if (last) {
+                E(http).send(last, [channelHandle]);
+              }
 
               return harden({
                 type: 'encouragement/subscribeNotificationsResponse',
+                instanceRegKey,
                 data: true,
               });
             }
