@@ -1,6 +1,6 @@
 # Skeleton Demo
 
-## Running the demo
+## Running the DApp frentend
 
 From the project directory, run:
 

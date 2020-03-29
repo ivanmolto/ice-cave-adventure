@@ -1,6 +1,6 @@
 // @ts-check
-import dappConstants from './dapp/constants.js';
-import { connect } from './connect.js';
+import dappConstants from '../lib/constants.js';
+import { connect, BRIDGE_ENDPOINT } from './connect.js';
 import { walletUpdatePurses } from './wallet.js';
 
 const { INSTANCE_REGKEY } = dappConstants;
@@ -48,7 +48,7 @@ export default async function main() {
       walletSend({ type: 'walletGetPurses'});
       return walletSend;
     }),
-    connect('api', apiRecv, '/api').then(apiSend => {
+    connect('api', apiRecv).then(apiSend => {
       apiSend({
         instanceRegKey: INSTANCE_REGKEY,
         type: 'skeleton/subscribeNotifications',

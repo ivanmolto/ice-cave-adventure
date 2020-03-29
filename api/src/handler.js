@@ -96,7 +96,7 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
 
   // TODO: Do any startup initialization here.
   if (overrideInstanceRegKey) {
-    startAdminSeat(overrideInstanceRegKey);
+    ensureNotifications(overrideInstanceRegKey);
   }
 
   const activeChannels = new Map();

@@ -13,9 +13,7 @@ const CONTRACT_NAME = 'skeleton';
  */
 export default harden(({ wallet, zoe, scratch, registrar }) => {
   return harden({
-    async initInstance({ source, moduleFormat }, _now = Date.now()) {
-      const installationHandle = await zoe~.install(source, moduleFormat);
-
+    async initInstance(installationHandle, _now = Date.now()) {
       // =====================
       // === AWAITING TURN ===
       // =====================

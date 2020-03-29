@@ -5,9 +5,16 @@ const overrides = [...jessieOverrides(['**/*.js'], __dirname)];
 
 module.exports = {
   parser: 'babel-eslint',
+  parserOptions: {
+    babelOptions: {
+      configFile: `${__dirname}/babel-eslint.cjs`,
+    },
+  },
+  overrides,
   extends: [
     'airbnb-base',
     // TODO: 'plugin:prettier/recommended',
+    'plugin:eslint-comments/recommended',
   ],
   env: {
     es6: true, // supports new ES6 globals (e.g., new types such as Set)
@@ -16,7 +23,6 @@ module.exports = {
     HandledPromise: false,
     globalThis: false,
   },
-  overrides,
   rules: {
     'implicit-arrow-linebreak': 'off',
     'function-paren-newline': 'off',
@@ -30,5 +36,6 @@ module.exports = {
     'no-unused-expressions': 'off',
     'no-loop-func': 'off',
     'import/prefer-default-export': 'off', // contrary to Agoric standard
+    'import/extensions': 'off', // Needed for Web compatibility
   },
 };

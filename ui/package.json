@@ -22,11 +22,16 @@
       "last 1 safari version"
     ]
   },
+  "eslintConfig": {
+    "extends": [
+      "../.eslintrc.js"
+    ]
+  },
   "staticFiles": {
     "staticPath": [
       {
-        "staticPath": "public/dapp",
-        "staticOutDir": "dapp"
+        "staticPath": "public/lib",
+        "staticOutDir": "lib"
       }
     ],
     "excludeGlob": "**/*.js",
