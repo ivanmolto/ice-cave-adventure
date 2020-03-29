@@ -1,5 +1,5 @@
 {
-  "name": "dapp-encouragement-contract",
+  "name": "@agoric/dapp-encouragement-contract",
   "version": "0.1.0",
   "private": true,
   "description": "Contract for the dapp-encouragement Agoric Dapp",
