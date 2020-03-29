@@ -2,10 +2,10 @@
 
 import dappConstants from '../lib/constants.js';
 
-const encouragementBrandRegKey = dappConstants.brandRegKeys.encouragement;
+const { encouragement: encouragementBrandRegKey } = dappConstants.brandRegKeys;
 
 /**
- * @typedef {Object} Purse
+ * @typedef {Object.<string, HTMLOptionElement>} Purse
  * @property {string} issuerPetname
  * @property {string} pursePetname
  * @property {any} extent
@@ -13,22 +13,17 @@ const encouragementBrandRegKey = dappConstants.brandRegKeys.encouragement;
  */
 
 /**
- * @typedef {Purse} PurseWithOptions
- * @property {HTMLOptionElement[]} [options]
- */
-
-/**
- * @type {PurseWithOptions[]}
+ * @type {Purse[]}
  */
 const tipPurses = [];
 
 /**
- * @type {PurseWithOptions[]}
+ * @type {Purse[]}
  */
 const encouragementPurses = [];
 
 /**
- * @type {PurseWithOptions[]}
+ * @type {Purse[]}
  */
 const tipIssuers = [];
 
@@ -50,7 +45,7 @@ const cmp = (a, b) => (a < b ? -1 : a === b ? 0 : 1);
  * Adjust the option elements in existing.
  * 
  * @param {string} key
- * @param {PurseWithOptions[]} existing
+ * @param {Purse[]} existing
  * @param {Purse[]} currents
  * @param {string[]} names
  * @param {Object.<string, HTMLSelectElement>} selects
@@ -138,6 +133,19 @@ export function walletUpdatePurses(purses, selects) {
  * @param {Object.<string, HTMLSelectElement>} selects
  */
 export function flipSelectedBrands(selects) {
+  let i = 0;
+  while (i < tipPurses.length) {
+    const purse = tipPurses[i];
+    if (purse.issuerPetname !== selects.$brands.value) {
+      // Remove the purse.
+      selects.$tipPurse.removeChild(purse.$tipPurse);
+      delete purse.$tipPurse;
+      tipPurses.splice(i, 1);
+    } else {
+      i += 1;
+    }
+  }
+
   updateOptions(
     'pursePetname',
     tipPurses,
