@@ -2,7 +2,7 @@
 /* eslint-disable no-use-before-define */
 import harden from '@agoric/harden';
 import { assert, details } from '@agoric/assert';
-import makePromise from '@agoric/make-promise';
+import { makePromise } from '@agoric/make-promise';
 
 /**
  * This contract does a few interesting things.

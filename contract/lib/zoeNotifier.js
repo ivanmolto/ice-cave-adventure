@@ -1,7 +1,7 @@
 // @ts-check
 import { E } from '@agoric/eventual-send';
 import harden from '@agoric/harden';
-import makePromise from '@agoric/make-promise';
+import { makePromise } from '@agoric/make-promise';
 import makeStore from '@agoric/store';
 
 const POLL_DELAY_S = 4;
