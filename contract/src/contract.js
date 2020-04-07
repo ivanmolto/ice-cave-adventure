@@ -18,7 +18,7 @@ export const makeContract = harden(zoe => {
   // state and a new 'changed' promise.
   let changed = makePromise();
   const getNotification = () => ({
-    changed: changed.p,
+    changed: changed.promise,
     messageTemplate,
     count,
   });
@@ -26,7 +26,7 @@ export const makeContract = harden(zoe => {
   const updateNotification = () => {
     // Resolve the old changed promise, and create a new
     // one.
-    changed.res();
+    changed.resolve();
     changed = makePromise();
   };
 

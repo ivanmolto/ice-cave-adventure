@@ -29,7 +29,7 @@ export function zoeNotifier({ zoe, timerService }) {
   // Deliver a result and a new promise for the next result.
   const doNotify = result => {
     const newNotify = makePromise();
-    notify.res({ ...result, nextP: newNotify.p });
+    notify.resolve({ ...result, nextP: newNotify.promise });
     notify = newNotify;
   };
 
@@ -88,5 +88,5 @@ export function zoeNotifier({ zoe, timerService }) {
     E(repeater).cancel();
   };
 
-  return { cancel, setHandleState, firstP: notify.p };
+  return { cancel, setHandleState, firstP: notify.promise };
 }
