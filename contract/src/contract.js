@@ -2,7 +2,7 @@
 /* eslint-disable no-use-before-define */
 import harden from '@agoric/harden';
 import { assert, details } from '@agoric/assert';
-import { makePromise } from '@agoric/make-promise';
+import { producePromise } from '@agoric/produce-promise';
 
 /**
  * This contract does a few interesting things.
@@ -16,7 +16,7 @@ export const makeContract = harden(zoe => {
   // has changed when the 'changed' promise resolves.
   // They then can call getNofication again to get the new
   // state and a new 'changed' promise.
-  let changed = makePromise();
+  let changed = producePromise();
   const getNotification = () => ({
     changed: changed.promise,
     messageTemplate,
@@ -27,7 +27,7 @@ export const makeContract = harden(zoe => {
     // Resolve the old changed promise, and create a new
     // one.
     changed.resolve();
-    changed = makePromise();
+    changed = producePromise();
   };
 
   const getEncouragement = name => {

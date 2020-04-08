@@ -1,8 +1,8 @@
 // GENERATED FROM /Users/michael/agoric/dapp-encouragement/contract/deploy.js
 export default {
   "CONTRACT_NAME": "encouragement",
-  "ADMIN_SEAT_SCRATCH": "encouragement_9794-admin",
-  "INSTANCE_REGKEY": "encouragement_9794",
+  "ADMIN_SEAT_SCRATCH": "encouragement_5496-admin",
+  "INSTANCE_REGKEY": "encouragement_5496",
   "brandRegKeys": {
     "Fee": "moola_3467",
     "Bonus": "simolean_2059"
