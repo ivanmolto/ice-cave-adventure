@@ -5,7 +5,7 @@
   "description": "Contract for the dapp-encouragement Agoric Dapp",
   "scripts": {
     "build": "exit 0",
-    "test": "tape -r esm 'test/**/*.js'",
+    "test": "tape -r esm 'test/**/*.js' | tap-spec",
     "lint": "eslint '**/*.{js,jsx}'",
     "lint-fix": "eslint --fix '**/*.{js,jsx}'",
     "lint-check": "eslint '**/*.{js,jsx}'",
