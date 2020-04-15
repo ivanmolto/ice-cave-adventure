@@ -1,15 +1,32 @@
-# Encouragement Agoric Dapp
+# Encouragement Dapp
 
-This is an [Agoric Dapp](https://agoric.com/documentation/dapps/) whose purpose is to show how the plumbing between a browser UI, the chain-connected ag-solo API server, and the on-chain contract should be done.
+The Encouragement Dapp is the simplest [Agoric
+Dapp](https://agoric.com/documentation/dapps/). It
+demonstrates the three important parts of
+a dapp and how they should be connected:
+1. the browser UI (the frontend)
+2. the API server (the backend)
+3. the on-chain contract
 
-This particular Dapp UI is written in vanilla JS (as opposed to using a framework), and does:
+This dapp starts a local
+blockchain on your computer, and deploys a basic contract to that
+blockchain. It does not currently deploy or connect to the Agoric testnet.
 
-1. subscribe to contract notifications via the API server
-2. accesses your Agoric wallet, and
-3. at the user's requoest, either:
-  a. requests some free encouragement, or
-   b. proposes (via the user's wallet and Zoe) exchanging a Tip for
-   some Encouragement
+This particular dapp UI is written in vanilla JS for simplicity (as
+opposed to using a framework).
+
+## Functionality
+
+The Encouragement Dapp:
+
+1. Subscribes to contract notifications via the API server
+2. Accesses your Agoric wallet, and
+3. At the user's request, either:
+
+    1. requests some free encouragement, or
+    2. proposes (via the user's wallet and Zoe) exchanging a Tip for
+       some Encouragement (the tip is not yet sent to the Zoe
+       contract, but you will still get some encouragement.)
 
 To learn more about how to build Agoric Dapps, please see the [Dapp Guide](https://agoric.com/documentation/dapps/).
 
