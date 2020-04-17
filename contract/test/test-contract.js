@@ -3,11 +3,11 @@ import { test } from 'tape-promise/tape';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import bundleSource from '@agoric/bundle-source';
 
-import { E } from '@agoric/eventual-send'
+import { E } from '@agoric/eventual-send';
 import harden from '@agoric/harden';
 
 import { makeZoe } from '@agoric/zoe';
-import produceIssuer from '@agoric/ERTP';
+import produceIssuer from '@agoric/ertp';
 import { makeGetInstanceHandle } from '@agoric/zoe/src/clientSupport';
 
 const contractPath = `${__dirname}/../src/contract`;
@@ -35,14 +35,21 @@ test('contract with valid offers', async t => {
     // installationHandle to someone else, and they can use it to
     // create a new contract instance using the same code.
     const installationHandle = await E(zoe).install(source, moduleFormat);
-    
+
     // Let's check the code. Outside of this test, we would probably
     // want to check more extensively,
     const code = await E(zoe).getInstallation(installationHandle);
-    t.ok(code.includes(`This contract does a few interesting things.`), `the code installed passes a quick check of what we intended to install`);
+    t.ok(
+      code.includes(`This contract does a few interesting things.`),
+      `the code installed passes a quick check of what we intended to install`,
+    );
 
     // Make some mints/issuers just for our test.
-    const { issuer: bucksIssuer, mint: bucksMint, amountMath: bucksAmountMath } = produceIssuer('bucks');
+    const {
+      issuer: bucksIssuer,
+      mint: bucksMint,
+      amountMath: bucksAmountMath,
+    } = produceIssuer('bucks');
 
     // Let's give ourselves 5 bucks to start
     const bucks5 = bucksAmountMath.make(5);
@@ -55,20 +62,27 @@ test('contract with valid offers', async t => {
 
     // Check that we received an invite as the result of making the
     // contract instance.
-    t.ok(await E(inviteIssuer).isLive(adminInvite), `an valid invite (an ERTP payment) was created`);
-    
+    t.ok(
+      await E(inviteIssuer).isLive(adminInvite),
+      `an valid invite (an ERTP payment) was created`,
+    );
+
     // Use the helper function to get an instanceHandle from the invite.
     const instanceHandle = await getInstanceHandle(adminInvite);
-    
+
     // Let's use the adminInvite to make an offer. This will allow us
     // to remove our tips at the end
     const {
       payout: adminPayoutP,
-      outcome: adminOutcomeP, 
-      cancelObj: { cancel: cancelAdmin }
+      outcome: adminOutcomeP,
+      cancelObj: { cancel: cancelAdmin },
     } = await E(zoe).offer(adminInvite);
 
-    t.equals(await adminOutcomeP, `admin invite redeemed`, `admin outcome is correct`);
+    t.equals(
+      await adminOutcomeP,
+      `admin invite redeemed`,
+      `admin outcome is correct`,
+    );
 
     // Let's test some of the publicAPI methods. The publicAPI is
     // accessible to anyone who has access to Zoe and the
@@ -101,8 +115,12 @@ test('contract with valid offers', async t => {
 
     const { outcome: encouragementP } = await E(zoe).offer(encouragementInvite);
 
-    t.equals(await encouragementP, `You're doing great!`, `encouragement matches expected`);
-    
+    t.equals(
+      await encouragementP,
+      `You're doing great!`,
+      `encouragement matches expected`,
+    );
+
     // Getting encouragement resolves the `changed` promise
     notificationBundle.changed.then(async result => {
       t.equals(result, undefined, 'resolves to undefined')
@@ -117,11 +135,19 @@ test('contract with valid offers', async t => {
       const paymentKeywordRecord = harden({
         Tip: bucksPayment,
       });
-      const { outcome: secondEncouragementP } = await E(zoe).offer(encouragementInvite2, proposal, paymentKeywordRecord);
-      
-      t.equals(await secondEncouragementP, `Wow, just wow. I have never seen such talent!`, `premium message is as expected`);
+      const { outcome: secondEncouragementP } = await E(zoe).offer(
+        encouragementInvite2,
+        proposal,
+        paymentKeywordRecord,
+      );
 
-      notificationBundle2.changed.then(async result => {
+      t.equals(
+        await secondEncouragementP,
+        `Wow, just wow. I have never seen such talent!`,
+        `premium message is as expected`,
+      );
+
+      notificationBundle2.changed.then(async () => {
         const notificationBundle3 = await E(publicAPI).getNotification();
         t.deepEquals(notificationBundle3.count, 2, `count is now 2`);
 
@@ -129,7 +155,11 @@ test('contract with valid offers', async t => {
         cancelAdmin();
         const adminPayout = await adminPayoutP;
         const tips = await adminPayout.Tip;
-        t.deepEquals(await bucksIssuer.getAmountOf(tips), bucks5, `payout is 5 bucks, all the tips`);
+        t.deepEquals(
+          await bucksIssuer.getAmountOf(tips),
+          bucks5,
+          `payout is 5 bucks, all the tips`,
+        );
       });
     });
   } catch (e) {
