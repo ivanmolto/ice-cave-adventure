@@ -13,9 +13,8 @@ import { makeGetInstanceHandle } from '@agoric/zoe/src/clientSupport';
 const contractPath = `${__dirname}/../src/contract`;
 
 test('contract with valid offers', async t => {
-  t.plan(11);
+  t.plan(10);
   try {
-
     // Outside of tests, we should use the long-lived Zoe on the
     // testnet. In this test, we must create a new Zoe.
     const zoe = makeZoe({ require });
@@ -92,17 +91,15 @@ test('contract with valid offers', async t => {
     const instanceRecord = await E(zoe).getInstance(instanceHandle);
     const { publicAPI } = instanceRecord;
 
-    // `getNotification` returns a record (bundle). The record has a
-    // property `changed` which is a promise that is resolved to undefined when
-    // something has changed. We can use this signal to know when to
-    // call `getNotification` again.
-    const notificationBundle = await E(publicAPI).getNotification();
+    const notifier = publicAPI.getNotifier();
+    const { value, updateHandle } = notifier.getUpdateSince();
+    const nextUpdateP = notifier.getUpdateSince(updateHandle);
 
     // Count starts at 0
-    t.equals(notificationBundle.count, 0, `count starts at 0`);
+    t.equals(value.count, 0, `count starts at 0`);
 
     t.deepEquals(
-      notificationBundle.messages,
+      value.messages,
       harden({
         basic: `You're doing great!`,
         premium: `Wow, just wow. I have never seen such talent!`,
@@ -121,17 +118,13 @@ test('contract with valid offers', async t => {
       `encouragement matches expected`,
     );
 
-    // Getting encouragement resolves the `changed` promise
-    notificationBundle.changed.then(async result => {
-      t.equals(result, undefined, 'resolves to undefined')
-
-      // Let's call `getNotification` again to see what changed
-      const notificationBundle2 = await E(publicAPI).getNotification();
-      t.equals(notificationBundle2.count, 1, `count increments by 1`);
+    // Getting encouragement resolves the 'nextUpdateP' promise
+    nextUpdateP.then(async result => {
+      t.equals(result.value.count, 1, 'count increments by 1');
 
       // Now, let's get a premium encouragement message
       const encouragementInvite2 = await E(publicAPI).makeInvite();
-      const proposal = harden({ give: { Tip: bucks5 }});
+      const proposal = harden({ give: { Tip: bucks5 } });
       const paymentKeywordRecord = harden({
         Tip: bucksPayment,
       });
@@ -147,19 +140,15 @@ test('contract with valid offers', async t => {
         `premium message is as expected`,
       );
 
-      notificationBundle2.changed.then(async () => {
-        const notificationBundle3 = await E(publicAPI).getNotification();
-        t.deepEquals(notificationBundle3.count, 2, `count is now 2`);
+      const newResult = notifier.getUpdateSince();
+      t.deepEquals(newResult.value.count, 2, `count is now 2`);
 
-        // Let's get our Tips
-        cancelAdmin();
-        const adminPayout = await adminPayoutP;
-        const tips = await adminPayout.Tip;
-        t.deepEquals(
-          await bucksIssuer.getAmountOf(tips),
-          bucks5,
-          `payout is 5 bucks, all the tips`,
-        );
+      // Let's get our Tips
+      cancelAdmin();
+      Promise.resolve(E.G(adminPayoutP).Tip).then(tip => {
+        bucksIssuer.getAmountOf(tip).then(tipAmount => {
+          t.deepEquals(tipAmount, bucks5, `payout is 5 bucks, all the tips`);
+        });
       });
     });
   } catch (e) {
