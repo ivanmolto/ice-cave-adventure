@@ -1,12 +1,11 @@
 // @ts-check
 // Agoric Dapp api deployment script
 
+import fs from 'fs';
 import dappConstants from '../ui/public/lib/constants.js';
 import { E } from '@agoric/eventual-send';
 import harden from '@agoric/harden';
 import { makeGetInstanceHandle } from '@agoric/zoe/src/clientSupport';
-
-import makeHandler from './src/handler';
 
 // deploy.js runs in an ephemeral Node.js outside of swingset. The
 // spawner runs within ag-solo, so is persistent.  Once the deploy.js
@@ -69,7 +68,9 @@ export default async function deployApi(referencesPromise, { bundleSource, pathR
   // To get the backend of our dapp up and running, first we need to
   // grab the installationHandle that our contract deploy script put
   // in the public registry.
-  const { INSTALLATION_REG_KEY } = dappConstants;
+  const { 
+    INSTALLATION_REG_KEY
+  } = dappConstants;
   const encouragementContractInstallationHandle = await E(registry).get(INSTALLATION_REG_KEY);
   
   // Second, we can use the installationHandle to create a new
@@ -140,10 +141,9 @@ export default async function deployApi(referencesPromise, { bundleSource, pathR
   // instanceHandle by adding it to the registry. Any users of our
   // contract will use this instanceHandle to get invites to the
   // contract in order to make an offer.
-  const CONTRACT_NAME = 'encouragement';
-  const INSTANCE_REG_KEY = await E(registry).register(`${CONTRACT_NAME}instance`, instanceHandle);
+  const INSTANCE_REG_KEY = await E(registry).register(`${dappConstants.CONTRACT_NAME}instance`, instanceHandle);
 
-  console.log(`-- Contract Name: ${CONTRACT_NAME}`);
+  console.log(`-- Contract Name: ${dappConstants.CONTRACT_NAME}`);
   console.log(`-- InstanceHandle Register Key: ${INSTANCE_REG_KEY}`);
 
   // We want the handler to run persistently. (Scripts such as this
@@ -162,4 +162,17 @@ export default async function deployApi(referencesPromise, { bundleSource, pathR
   const handler = E(handlerInstall).spawn({ publicAPI, http });
   await E(http).registerAPIHandler(handler);
 
+
+  // Re-save the constants somewhere where the UI and api can find it.
+  const newDappConstants = {
+    INSTANCE_REG_KEY,
+    ...dappConstants,
+  };
+  const defaultsFile = pathResolve(`../ui/public/conf/defaults.js`);
+  console.log('writing', defaultsFile);
+  const defaultsContents = `\
+  // GENERATED FROM ${pathResolve('./deploy.js')}
+  export default ${JSON.stringify(newDappConstants, undefined, 2)};
+  `;
+  await fs.promises.writeFile(defaultsFile, defaultsContents);
 }
