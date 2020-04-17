@@ -2,7 +2,10 @@
 
 import dappConstants from '../lib/constants.js';
 
-const { encouragement: encouragementBrandRegKey } = dappConstants.brandRegKeys;
+// const { encouragement: encouragementBrandRegKey } =
+// dappConstants.brandRegKeys;
+
+const encouragementBrandRegKey = '';
 
 /**
  * @typedef {Object.<string, HTMLOptionElement>} Purse

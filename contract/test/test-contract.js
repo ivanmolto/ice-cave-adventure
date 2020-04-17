@@ -42,21 +42,33 @@ test('contract with valid offers', async t => {
     t.ok(code.includes(`This contract does a few interesting things.`), `the code installed passes a quick check of what we intended to install`);
 
     // Make some mints/issuers just for our test.
-    const shruteBucksBundle = produceIssuer('bucks');
-    const stanleyNickelsBundles = produceIssuer('nickels');
+    const { issuer: bucksIssuer, mint: bucksMint, amountMath: bucksAmountMath } = produceIssuer('bucks');
 
-    // Create the contract instance, using our new issuers.
-    const invite = await E(zoe).makeInstance(installationHandle, {
-      Fee: shruteBucksBundle.issuer,
-      Bonus: stanleyNickelsBundles.issuer,
+    // Let's give ourselves 5 bucks to start
+    const bucks5 = bucksAmountMath.make(5);
+    const bucksPayment = bucksMint.mintPayment(bucks5);
+
+    // Create the contract instance, using our new issuer.
+    const adminInvite = await E(zoe).makeInstance(installationHandle, {
+      Tip: bucksIssuer,
     });
 
     // Check that we received an invite as the result of making the
     // contract instance.
-    t.ok(await E(inviteIssuer).isLive(invite), `an valid invite (an ERTP payment) was created`);
+    t.ok(await E(inviteIssuer).isLive(adminInvite), `an valid invite (an ERTP payment) was created`);
     
     // Use the helper function to get an instanceHandle from the invite.
-    const instanceHandle = await getInstanceHandle(invite);
+    const instanceHandle = await getInstanceHandle(adminInvite);
+    
+    // Let's use the adminInvite to make an offer. This will allow us
+    // to remove our tips at the end
+    const {
+      payout: adminPayoutP,
+      outcome: adminOutcomeP, 
+      cancelObj: { cancel: cancelAdmin }
+    } = await E(zoe).offer(adminInvite);
+
+    t.equals(await adminOutcomeP, `admin invite redeemed`, `admin outcome is correct`);
 
     // Let's test some of the publicAPI methods. The publicAPI is
     // accessible to anyone who has access to Zoe and the
@@ -75,18 +87,23 @@ test('contract with valid offers', async t => {
     // Count starts at 0
     t.equals(notificationBundle.count, 0, `count starts at 0`);
 
-    // The message template default
     t.deepEquals(
-      notificationBundle.messageTemplate,
-      harden([ 'Hello, ', '$name', ', you\'re doing great!' ]),
-      `messageTemplate default`
+      notificationBundle.messages,
+      harden({
+        basic: `You're doing great!`,
+        premium: `Wow, just wow. I have never seen such talent!`,
+      }),
+      `messages are as expected`,
     );
 
     // Let's use the contract like a client and get some encouragement!
-    const encouragement = await E(publicAPI).getEncouragement('Alice');
-    t.equals(encouragement, `Hello, Alice, you\'re doing great!`, `encouragement matches expected`);
+    const encouragementInvite = await E(publicAPI).makeInvite();
+
+    const { outcome: encouragementP } = await E(zoe).offer(encouragementInvite);
+
+    t.equals(await encouragementP, `You're doing great!`, `encouragement matches expected`);
     
-    // Calling `getEncouragement` resolves the `changed` promise
+    // Getting encouragement resolves the `changed` promise
     notificationBundle.changed.then(async result => {
       t.equals(result, undefined, 'resolves to undefined')
 
@@ -94,27 +111,25 @@ test('contract with valid offers', async t => {
       const notificationBundle2 = await E(publicAPI).getNotification();
       t.equals(notificationBundle2.count, 1, `count increments by 1`);
 
-      // Now, let's change the message template with our admin invite.
-      // First we must redeem the invite to get a seat from Zoe.
-      const { seat } = await E(zoe).redeem(invite);
-
-      // This is the wrong format - the new message template must be
-      // an array.
-      t.rejects(() => E(seat).setMessageTemplate('new message'), /Error: \(a string\) must be an array/, `must be an array`);
-
-      const newTemplate = ['Hey! ', '$name', ', how did you get so good at this?!' ];
-      const setMessageTemplateResult = await E(seat).setMessageTemplate(newTemplate);
-      t.equals(setMessageTemplateResult, undefined, `nothing is returned when setting message template`);
+      // Now, let's get a premium encouragement message
+      const encouragementInvite2 = await E(publicAPI).makeInvite();
+      const proposal = harden({ give: { Tip: bucks5 }});
+      const paymentKeywordRecord = harden({
+        Tip: bucksPayment,
+      });
+      const { outcome: secondEncouragementP } = await E(zoe).offer(encouragementInvite2, proposal, paymentKeywordRecord);
+      
+      t.equals(await secondEncouragementP, `Wow, just wow. I have never seen such talent!`, `premium message is as expected`);
 
       notificationBundle2.changed.then(async result => {
         const notificationBundle3 = await E(publicAPI).getNotification();
-        
-        // Let's check that we successfully set the new template.
-        t.deepEquals(notificationBundle3.messageTemplate, newTemplate, `template is new template`);
-        
-        // Let's check that the new template works.
-        const encouragement = await E(publicAPI).getEncouragement('Bob');
-        t.equals(encouragement, `Hey! Bob, how did you get so good at this?!`, `encouragement matches new message`);
+        t.deepEquals(notificationBundle3.count, 2, `count is now 2`);
+
+        // Let's get our Tips
+        cancelAdmin();
+        const adminPayout = await adminPayoutP;
+        const tips = await adminPayout.Tip;
+        t.deepEquals(await bucksIssuer.getAmountOf(tips), bucks5, `payout is 5 bucks, all the tips`);
       });
     });
   } catch (e) {

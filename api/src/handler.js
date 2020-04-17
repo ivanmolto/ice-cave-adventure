@@ -2,7 +2,7 @@
 import harden from '@agoric/harden';
 import { E } from '@agoric/eventual-send';
 
-export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http, overrideInstanceRegKey = undefined }, _inviteMaker) => {
+export default harden(({ publicAPI, http, overrideInstanceRegKey = undefined }, _inviteMaker) => {
   // If we have an overrideInstanceRegKey, use it to assert the correct value in the RPC.
   function coerceInstanceRegKey(instanceRegKey = undefined) {
     if (instanceRegKey === undefined) {
@@ -12,33 +12,6 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
       return instanceRegKey;
     }
     throw TypeError(`instanceRegKey ${JSON.stringify(instanceRegKey)} must match ${JSON.stringify(overrideInstanceRegKey)}`);
-  }
-
-  const brandToBrandRegKey = new Map();
-  Object.entries(brands).forEach(([keyword, brand]) =>
-    brandToBrandRegKey.set(brand, brandRegKeys[keyword]));
-
-  const registrarPCache = new Map();
-  function getRegistrarP(id) {
-    let regP = registrarPCache.get(id);
-    if (!regP) {
-      // Cache miss, so try the registrar.
-      regP = E(registrar).get(id);
-      registrarPCache.set(id, regP);
-    }
-    return regP;
-  }
-
-  const instancePCache = new Map();
-  function getInstanceP(id) {
-    let instanceP = instancePCache.get(id);
-    if (!instanceP) {
-      const instanceHandleP = getRegistrarP(id);
-      instanceP = instanceHandleP.then(instanceHandle =>
-        E(zoe).getInstance(instanceHandle));
-      instancePCache.set(id, instanceP);
-    }
-    return instanceP;
   }
 
   // Here's how you could implement a notification-based
@@ -85,19 +58,13 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
 
   const startedInstances = new Set();
   function ensureNotifications(instanceRegKey) {
-    const adminSeat = adminSeats[instanceRegKey];
-    if (!adminSeat || startedInstances.has(instanceRegKey)) {
-      return;
-    }
     startedInstances.add(instanceRegKey);
 
     // TODO: This is where you could call any functions from the initial
     // (privately-held) seat that the Zoe contract creates.
-    E(adminSeat).setMessageTemplate(
-      ['Hey ', '$name', `, you sure know how to use this Dapp!`]);
+
   
-    getInstanceP(instanceRegKey)
-      .then(({ publicAPI }) => handleNotification(instanceRegKey, publicAPI));
+    handleNotification(instanceRegKey, publicAPI);
   }
 
   // TODO: Do any startup initialization here.
@@ -137,12 +104,11 @@ export default harden(({ adminSeats, brands, brandRegKeys, zoe, registrar, http,
             case 'encouragement/getEncouragement': {
               let { instanceRegKey, name } = obj;
               instanceRegKey = coerceInstanceRegKey(instanceRegKey);
-              const { publicAPI } = await getInstanceP(instanceRegKey);
 
               return harden({
                 type: 'encouragement/getEncouragementResponse',
                 instanceRegKey,
-                data: await E(publicAPI).getEncouragement(name),
+                data: `You shouldn't be getting an encouragement yet! This needs to go through your wallet.`,
               });
             }
 

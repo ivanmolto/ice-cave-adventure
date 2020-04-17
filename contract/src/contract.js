@@ -1,25 +1,33 @@
 // @ts-check
-/* eslint-disable no-use-before-define */
 import harden from '@agoric/harden';
-import { assert, details } from '@agoric/assert';
 import { producePromise } from '@agoric/produce-promise';
+import {
+  makeZoeHelpers,
+} from '@agoric/zoe/src/contractSupport/zoeHelpers';
 
 /**
  * This contract does a few interesting things.
  */
-export const makeContract = harden(zoe => {
+export const makeContract = harden(zcf => {
   let count = 0;
-  let messageTemplate = ['Hello, ', '$name', `, you're doing great!`];
+  const messages = {
+    basic: `You're doing great!`,
+    premium: `Wow, just wow. I have never seen such talent!`,
+  };
+  let adminOfferHandle;
+  const tipAmountMath = zcf.getAmountMaths(harden(['Tip'])).Tip;
+
+  const { inviteAnOffer, rejectOffer } = makeZoeHelpers(zcf);
 
   // Implement simple notifications for the contract state.
   // A caller of getNotification is notified that the state
   // has changed when the 'changed' promise resolves.
-  // They then can call getNofication again to get the new
+  // They then can call getNotification again to get the new
   // state and a new 'changed' promise.
   let changed = producePromise();
   const getNotification = () => ({
     changed: changed.promise,
-    messageTemplate,
+    messages,
     count,
   });
 
@@ -30,41 +38,54 @@ export const makeContract = harden(zoe => {
     changed = producePromise();
   };
 
-  const getEncouragement = name => {
-    let encouragement = '';
-    for (let i = 0; i < messageTemplate.length; i += 2) {
-      const [plain, lookup] = messageTemplate.slice(i, i + 2);
-      encouragement += plain;
+  const adminHook = offerHandle => {
+    adminOfferHandle = offerHandle;
+    return `admin invite redeemed`;
+  };
 
-      switch (lookup) {
-        case undefined:
-          break;
-        case '$name':
-          encouragement += name;
-          break;
-        default:
-          encouragement += `**${lookup}**`;
-      }
+  const encouragementHook = offerHandle => {
+    // if the adminOffer is no longer active (i.e. the admin cancelled
+    // their offer and retrieved their tips), we just don't give any
+    // encouragement.
+    if (!zcf.isOfferActive(adminOfferHandle)) {
+      rejectOffer(offerHandle, `We are no longer giving encouragement`);
     }
+
+    const userTipAllocation = zcf.getCurrentAllocation(offerHandle).Tip;
+    let encouragement = messages.basic;
+    // if the user gives a tip, we provide a premium encouragement
+    // message
+    debugger;
+    if (userTipAllocation && tipAmountMath.isGTE(userTipAllocation, tipAmountMath.make(1))) {
+      encouragement = messages.premium;
+      // reallocate the tip to the adminOffer
+      const adminTipAllocation = zcf.getCurrentAllocation(adminOfferHandle).Tip;
+      const newAdminAllocation = {
+        Tip: tipAmountMath.add(adminTipAllocation, userTipAllocation),
+      };
+      const newUserAllocation = {
+        Tip: tipAmountMath.getEmpty(),
+      };
+
+      zcf.reallocate(
+        harden([adminOfferHandle, offerHandle]), 
+        harden([newAdminAllocation, newUserAllocation]),
+        harden(['Tip']),
+      );
+    }
+    zcf.complete(harden([offerHandle]));
     count += 1;
     updateNotification();
     return encouragement;
   };
 
-  const makeAdminInvite = () => {
-    const seat = harden({
-      setMessageTemplate(msg) {
-        assert(Array.isArray(msg), details`${msg} must be an array`);
-        messageTemplate = msg;
-        updateNotification();
-      },
-    });
-    const { invite } = zoe.makeInvite(seat);
-    return invite;
-  };
+  const makeInvite = () => inviteAnOffer(harden({
+    offerHook: encouragementHook,
+    customProperties: { inviteDesc: 'encouragement'},
+  }));
 
   return harden({
-    invite: makeAdminInvite(),
-    publicAPI: { getEncouragement, getNotification },
+    invite: inviteAnOffer(harden({ offerHook: adminHook, customProperties: { inviteDesc: 'admin'} })),
+    publicAPI: { getNotification, makeInvite },
   });
 });
