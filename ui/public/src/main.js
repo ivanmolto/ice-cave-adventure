@@ -11,7 +11,6 @@ const { INSTANCE_REGKEY } = dappConstants;
 const selects = {
   $brands: /** @type {HTMLSelectElement} */ (document.getElementById('brands')),
   $tipPurse: /** @type {HTMLSelectElement} */ (document.getElementById('tipPurse')),
-  $encouragementPurse: /** @type {HTMLSelectElement} */ (document.getElementById('encouragementPurse')),
 };
 
 export default async function main() {
@@ -54,7 +53,6 @@ export default async function main() {
   };
 
   const $encourageMe = /** @type {HTMLInputElement} */ (document.getElementById('encourageMe'));
-  const $inputName = /** @type {HTMLInputElement} */ (document.getElementById('inputName'));
 
   await Promise.all([
     connect('wallet', walletRecv).then(walletSend => {
@@ -69,11 +67,6 @@ export default async function main() {
 
       $encourageMe.removeAttribute('disabled');
       $encourageMe.addEventListener('click', () => {
-        const name = $inputName.value.trim();
-        if (name === '') {
-          alert(`I don't know who to encourage!`);
-          return false;
-        }
         apiSend({
           instanceRegKey: INSTANCE_REGKEY,
           type: 'encouragement/getEncouragement',

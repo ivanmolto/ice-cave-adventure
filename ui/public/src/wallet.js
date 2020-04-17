@@ -23,11 +23,6 @@ const tipPurses = [];
 /**
  * @type {Purse[]}
  */
-const encouragementPurses = [];
-
-/**
- * @type {Purse[]}
- */
 const tipIssuers = [];
 
 /**
@@ -119,22 +114,17 @@ const updateOptions = (key, existing, currents, names, selects) => {
  * @param {Object.<string, HTMLSelectElement>} selects
  */
 export function walletUpdatePurses(purses, selects) {
-  allPurses = purses.sort(({ pursePetname: a }, { pursePetname: b }) =>
-    cmp(a, b));
+
+  // Currently, we can only give moola tips.
+  allPurses = purses.filter( ({ issuerPetname }) => (issuerPetname === 'moola'));
+  // allPurses = purses.sort(({ pursePetname: a }, { pursePetname: b }) =>
+  //   cmp(a, b));
 
   const newIssuers = allPurses.sort(({ issuerPetname: a }, { issuerPetname: b }) =>
     cmp(a, b));
 
   // Enable the purse list.
   updateOptions('issuerPetname', tipIssuers, newIssuers, ['$brands'], selects);
-
-  updateOptions(
-    'pursePetname',
-    encouragementPurses,
-    allPurses.filter(({ brandRegKey }) => brandRegKey === encouragementBrandRegKey),
-    ['$encouragementPurse'],
-    selects,
-  );
 
   flipSelectedBrands(selects);
 }

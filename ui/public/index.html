@@ -13,13 +13,17 @@
 
     <h2>Do you know you're great?</h2>
 
-    <p>Everybody could use a little encouragement now and then.  Fill out your name below, choose your options, and then hit "Encourage Me!"</p>
+    <p>Everybody could use a little encouragement now and then. Click
+    "Encourage Me!" to get a new message. Tips are optional, but
+    requests with tips get a little more encouraging. Note: to give a
+    tip, you will need to approve the offer in your wallet (<a
+    href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a>).</p>
 
     <form onsubmit="return false">
       <p>
-        Encourage <input type="text" id="inputName" placeholder="your name" />, and receive encouragement to <select id="encouragementPurse" disabled="disabled">
-          <option value="">display only</option>
-        </select><br />
+        Request encouragement...
+        <br/>
+        <br/>
         <label for="forFree"><input type="radio" id="forFree" value="free" checked="checked" name="tipKind" />
           for free</label><br />
         <label for="forTip"><input type="radio" id="forTip" value="tip" name="tipKind" />

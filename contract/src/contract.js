@@ -86,6 +86,12 @@ export const makeContract = harden(zcf => {
 
   return harden({
     invite: inviteAnOffer(harden({ offerHook: adminHook, customProperties: { inviteDesc: 'admin'} })),
-    publicAPI: { getNotification, makeInvite },
+    publicAPI: { getNotification, makeInvite, 
+      getFreeEncouragement: () => {
+        count += 1;
+        updateNotification();
+        return messages.basic;
+      },
+    },
   });
 });
