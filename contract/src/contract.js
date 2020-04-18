@@ -1,10 +1,12 @@
 // @ts-check
 import harden from '@agoric/harden';
-import { producePromise } from '@agoric/produce-promise';
+import { produceNotifier } from '@agoric/notifier';
 import { makeZoeHelpers } from '@agoric/zoe/src/contractSupport/zoeHelpers';
 
 /**
  * This contract does a few interesting things.
+ *
+ * @type {import('@agoric/zoe').MakeContract}
  */
 export const makeContract = harden(zcf => {
   let count = 0;
@@ -12,29 +14,16 @@ export const makeContract = harden(zcf => {
     basic: `You're doing great!`,
     premium: `Wow, just wow. I have never seen such talent!`,
   };
+  const { notifier, updater } = produceNotifier();
   let adminOfferHandle;
   const tipAmountMath = zcf.getAmountMaths(harden(['Tip'])).Tip;
 
   const { inviteAnOffer, rejectOffer } = makeZoeHelpers(zcf);
 
-  // Implement simple notifications for the contract state.
-  // A caller of getNotification is notified that the state
-  // has changed when the 'changed' promise resolves.
-  // They then can call getNotification again to get the new
-  // state and a new 'changed' promise.
-  let changed = producePromise();
-  const getNotification = () => ({
-    changed: changed.promise,
-    messages,
-    count,
-  });
-
   const updateNotification = () => {
-    // Resolve the old changed promise, and create a new
-    // one.
-    changed.resolve();
-    changed = producePromise();
+    updater.updateState({ messages, count });
   };
+  updateNotification();
 
   const adminHook = offerHandle => {
     adminOfferHandle = offerHandle;
@@ -51,8 +40,7 @@ export const makeContract = harden(zcf => {
 
     const userTipAllocation = zcf.getCurrentAllocation(offerHandle).Tip;
     let encouragement = messages.basic;
-    // if the user gives a tip, we provide a premium encouragement
-    // message
+    // if the user gives a tip, we provide a premium encouragement message
     if (
       userTipAllocation &&
       tipAmountMath.isGTE(userTipAllocation, tipAmountMath.make(1))
@@ -95,7 +83,7 @@ export const makeContract = harden(zcf => {
       }),
     ),
     publicAPI: {
-      getNotification,
+      getNotifier: () => notifier,
       makeInvite,
       getFreeEncouragement: () => {
         count += 1;

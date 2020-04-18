@@ -3,11 +3,12 @@ import harden from '@agoric/harden';
 import { E } from '@agoric/eventual-send';
 
 export default harden(({ publicAPI, http }, _inviteMaker) => {
+  let notifier;
 
   // Here's how you could implement a notification-based
   // publish/subscribe.
   const subChannelHandles = new Set();
-   
+
   const sendToSubscribers = obj => {
     E(http).send(obj, [...subChannelHandles.keys()])
       .catch(e => console.error('cannot send', e));
@@ -16,24 +17,29 @@ export default harden(({ publicAPI, http }, _inviteMaker) => {
   const fail = e => {
     const obj = {
       type: 'encouragement/encouragedError',
-      data: e && e.message || e,
+      data: (e && e.message) || e
     };
     sendToSubscribers(obj);
   };
 
-  const doOneNotification = ({ changed, ...rest }) => {
+  const doOneNotification = updateResponse => {
     // Publish to our subscribers.
     const obj = {
       type: 'encouragement/encouragedResponse',
-      data: rest,
+      data: updateResponse.value,
     };
     sendToSubscribers(obj);
 
     // Wait until the next notification resolves.
-    changed.then(_ => E(publicAPI).getNotification().then(doOneNotification, fail));
+    E(notifier)
+      .getUpdateSince(updateResponse.updateHandle)
+      .then(doOneNotification, fail);
   };
 
-  E(publicAPI).getNotification().then(doOneNotification, fail);
+  notifier = E(publicAPI).getNotifier();
+  E(notifier)
+    .getUpdateSince()
+    .then(doOneNotification, fail);
 
   return harden({
     getCommandHandler() {
