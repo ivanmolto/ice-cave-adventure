@@ -28,6 +28,7 @@
     "@agoric/assert": "^0.0.2",
     "@agoric/eventual-send": "^0.5.0",
     "@agoric/harden": "0.0.4",
+    "@agoric/ertp": "^0.5.2",
     "@agoric/produce-promise": "^0.0.5",
     "@agoric/store": "^0.0.2",
     "@agoric/zoe": "^0.3.0",
@@ -47,10 +48,41 @@
   "homepage": "https://github.com/Agoric/agoric#readme",
   "eslintConfig": {
     "extends": [
-      "../.eslintrc.js"
-    ]
+      "airbnb-base",
+      "plugin:prettier/recommended"
+    ],
+    "env": {
+      "es6": true
+    },
+    "rules": {
+      "implicit-arrow-linebreak": "off",
+      "function-paren-newline": "off",
+      "arrow-parens": "off",
+      "strict": "off",
+      "no-console": "off",
+      "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_"
+        }
+      ],
+      "no-return-assign": "off",
+      "no-param-reassign": "off",
+      "no-restricted-syntax": [
+        "off",
+        "ForOfStatement"
+      ],
+      "no-unused-expressions": "off",
+      "no-loop-func": "off",
+      "no-inner-declarations": "off",
+      "import/prefer-default-export": "off"
+    }
   },
-  "prettier": "../.prettierrc",
+  "prettier": {
+    "trailingComma": "all",
+    "singleQuote": true
+  },
   "eslintIgnore": [
     "dappConstants.js"
   ]

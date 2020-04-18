@@ -1,9 +1,7 @@
 // @ts-check
 import harden from '@agoric/harden';
 import { producePromise } from '@agoric/produce-promise';
-import {
-  makeZoeHelpers,
-} from '@agoric/zoe/src/contractSupport/zoeHelpers';
+import { makeZoeHelpers } from '@agoric/zoe/src/contractSupport/zoeHelpers';
 
 /**
  * This contract does a few interesting things.
@@ -55,8 +53,10 @@ export const makeContract = harden(zcf => {
     let encouragement = messages.basic;
     // if the user gives a tip, we provide a premium encouragement
     // message
-    debugger;
-    if (userTipAllocation && tipAmountMath.isGTE(userTipAllocation, tipAmountMath.make(1))) {
+    if (
+      userTipAllocation &&
+      tipAmountMath.isGTE(userTipAllocation, tipAmountMath.make(1))
+    ) {
       encouragement = messages.premium;
       // reallocate the tip to the adminOffer
       const adminTipAllocation = zcf.getCurrentAllocation(adminOfferHandle).Tip;
@@ -68,7 +68,7 @@ export const makeContract = harden(zcf => {
       };
 
       zcf.reallocate(
-        harden([adminOfferHandle, offerHandle]), 
+        harden([adminOfferHandle, offerHandle]),
         harden([newAdminAllocation, newUserAllocation]),
         harden(['Tip']),
       );
@@ -79,14 +79,24 @@ export const makeContract = harden(zcf => {
     return encouragement;
   };
 
-  const makeInvite = () => inviteAnOffer(harden({
-    offerHook: encouragementHook,
-    customProperties: { inviteDesc: 'encouragement'},
-  }));
+  const makeInvite = () =>
+    inviteAnOffer(
+      harden({
+        offerHook: encouragementHook,
+        customProperties: { inviteDesc: 'encouragement' },
+      }),
+    );
 
   return harden({
-    invite: inviteAnOffer(harden({ offerHook: adminHook, customProperties: { inviteDesc: 'admin'} })),
-    publicAPI: { getNotification, makeInvite, 
+    invite: inviteAnOffer(
+      harden({
+        offerHook: adminHook,
+        customProperties: { inviteDesc: 'admin' },
+      }),
+    ),
+    publicAPI: {
+      getNotification,
+      makeInvite,
       getFreeEncouragement: () => {
         count += 1;
         updateNotification();
