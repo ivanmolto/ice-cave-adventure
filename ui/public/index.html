@@ -19,18 +19,15 @@
       requests with tips get a little more encouraging.
       </p> Note: To give a
       tip, first select the "for a tip..." item below, then click the
-      "Encourage Me!" button. For now, you can only give tips of 1 moola
-      that's taken out of your wallet's fun budget. After selecting to
-      give a tip, go to your wallet at
-      <a href="http://127.0.0.1:8000/"
-      target="_blank">http://127.0.0.1:8000/</a>. Look under
+      "Encourage Me!" button. After selecting to
+      give a tip, your wallet will pop up.  Look under
       "Transactions" for the proposed offers that are awaiting approval (or
       rejection). Click on the check mark in a green circle to approve
       giving a tip, or on the x in a red circle to disapprove.</p>
     </div>
 
-    <form onsubmit="return false">
-      <p>
+    <form id="encourageForm" target="" onsubmit="return !!this.target">
+    <p>
         Request encouragement...
         <br/>
         <br/>

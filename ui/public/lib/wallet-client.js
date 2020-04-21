@@ -52,6 +52,18 @@ function createSocket({ onConnect, onDisconnect, onMessage }, endpoint = '/priva
     });
   }
 
+  let ifrQueue = [];
+  const flushQueue =  () => {
+    const q = ifrQueue;
+    ifrQueue = undefined;
+    ifr.removeEventListener('load', flushQueue);
+    while (q.length) {
+      const obj = q.shift();
+      ifr.contentWindow.postMessage(obj, window.origin);
+    }
+  };
+  ifr.addEventListener('load', flushQueue);
+
   // FIXME: Don't assume our location.
   ifr.src = 'lib/agoric-wallet.html';
   if (onMessage) {
@@ -60,7 +72,11 @@ function createSocket({ onConnect, onDisconnect, onMessage }, endpoint = '/priva
   const messageListeners = new Set();
   registerSocket(endpoint, {
     send(obj) {
-      ifr.contentWindow.postMessage(obj, window.origin);
+      if (ifrQueue) {
+        ifrQueue.push(obj);
+      } else {
+        ifr.contentWindow.postMessage(obj, window.origin);
+      }
     },
     addHandler(handler) {
       messageListeners.add(handler);

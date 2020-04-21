@@ -13,12 +13,22 @@
       let bridgeOrigin;
       let bridgeURL;
       function fromFrame(ev) {
+        // console.log('have from frame', ev.origin, localAgoricOrigin, bridgeOrigin);
         if (ev.origin === localAgoricOrigin) {
-          const walletURL = ev.data;
+          if (typeof ev.data !== 'string') {
+            return;
+          }
 
+          try {
+            new URL(ev.data);
+          } catch (e) {
+            return;
+          }
+
+          const walletURL = ev.data;
           console.log('found Agoric wallet', walletURL);
           if (window.parent !== window) {
-            window.parent.postMessage({ type: 'walletURL', walletURL });
+            window.parent.postMessage({ type: 'walletURL', walletURL }, '*');
           }
           bridgeURL = `${walletURL}-bridge.html`;
           bridgeOrigin = new URL(bridgeURL).origin;
@@ -28,38 +38,31 @@
           ifr.onload = () => {
             const loadedMessage = { type: 'walletBridgeLoaded' };
             if (window.parent !== window) {
-              window.parent.postMessage(loadedMessage, window.origin);
+              window.parent.postMessage(loadedMessage, '*');
             }
             while (walletQueue.length) {
-              ifr.contentWindow.postMessage(walletQueue.shift(), bridgeOrigin);
+              ifr.contentWindow.postMessage(walletQueue.shift(), '*');
             }
           };
+        } else if (!ev.data || !ev.data.type || !ev.data.type.startsWith('wallet')) {
+          // console.log('not a wallet message', ev);
         } else if (ev.origin === bridgeOrigin) {
-          // console.log('from wallet', ev.data);
           if (window.parent !== window) {
-            window.parent.postMessage(ev.data, window.origin);
+            window.parent.postMessage(ev.data, '*');
           }
-        }
-      }
-
-      function fromDapp(ev) {
-        if (ev.origin !== window.origin) {
-          return;
-        }
-
-        // console.log('from dapp', ev.data);
-        if (bridgeOrigin === undefined || ifr.src !== bridgeURL) {
-          walletQueue.push(ev.data);
         } else {
-          ifr.contentWindow.postMessage(ev.data, bridgeOrigin);
+          // console.log('from dapp', ev.data);
+          if (bridgeOrigin === undefined || ifr.src !== bridgeURL) {
+            walletQueue.push(ev.data);
+          } else {
+            ifr.contentWindow.postMessage(ev.data, bridgeOrigin);
+          }
         }
       }
 
       console.log('finding Agoric wallet from', localAgoricURL);
       window.addEventListener('message', fromFrame);
       ifr.src = localAgoricURL;
-
-      window.addEventListener('message', fromDapp);
     </script>
   </body>
 </html>

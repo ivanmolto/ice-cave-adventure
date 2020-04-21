@@ -115,7 +115,7 @@ const updateOptions = (key, existing, currents, names, selects) => {
  */
 export function walletUpdatePurses(purses, selects) {
 
-  // Currently, we can only give moola tips.
+  // FIXME: Currently, we can only give moola tips.
   allPurses = purses.filter( ({ issuerPetname }) => (issuerPetname === 'moola'));
   // allPurses = purses.sort(({ pursePetname: a }, { pursePetname: b }) =>
   //   cmp(a, b));
