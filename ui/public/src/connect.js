@@ -61,6 +61,9 @@ export const connect = (id, recv) => {
      * @param {{ type: string }} msg
      */
     onMessage(obj) {
+      if (!obj || typeof obj.type !== 'string') {
+        return;
+      }
       const $m = document.createElement('div');
       $m.className = `message receive ${id}`;
       $m.innerText = `${id}< ${JSON.stringify(obj)}`;

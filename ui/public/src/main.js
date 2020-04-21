@@ -13,8 +13,9 @@ const selects = {
   $tipPurse: /** @type {HTMLSelectElement} */ (document.getElementById('tipPurse')),
 };
 
-const $forFree = document.getElementById('forFree');
-const $forTip = document.getElementById('forTip');
+const $forFree = /** @type {HTMLInputElement} */ (document.getElementById('forFree'));
+const $forTip = /** @type {HTMLInputElement} */ (document.getElementById('forTip'));
+const $encourageForm = /** @type {HTMLFormElement} */ (document.getElementById('encourageForm'));
 
 export default async function main() {
   selects.$brands.addEventListener('change', () => {
@@ -22,7 +23,7 @@ export default async function main() {
   });
   
   /**
-   * @param {{ type: string; data: any; }} obj
+   * @param {{ type: string; data: any; walletURL: string }} obj
    */
   const walletRecv = obj => {
     switch (obj.type) {
@@ -30,16 +31,19 @@ export default async function main() {
         const purses = JSON.parse(obj.data);
         console.log('got purses', purses);
         walletUpdatePurses(purses, selects);
+        $inputAmount.removeAttribute('disabled');
         break;
       }
       case 'walletURL': {
-       // FIXME: Change the anchor href to URL.
+       // Change the form action to URL.
+       $encourageForm.action = `${obj.walletURL}`;
        break;
       }
     }
   };
 
   const $numEncouragements = /** @type {HTMLInputElement} */ (document.getElementById('numEncouragements'));
+  const $inputAmount = /** @type {HTMLInputElement} */ (document.getElementById('inputAmount'));
 
   /**
    * @param {{ type: string; data: any; }} obj
@@ -70,11 +74,13 @@ export default async function main() {
     $encourageMe.removeAttribute('disabled');
     $encourageMe.addEventListener('click', () => {
       if ($forFree.checked) {
+        $encourageForm.target = '';
         apiSend({
           type: 'encouragement/getEncouragement',
         });
       }
       if ($forTip.checked) {
+        $encourageForm.target = '_blank';
         const now = Date.now();
         const offer = {
           // JSONable ID for this offer.  This is scoped to the origin.
@@ -97,8 +103,8 @@ export default async function main() {
             give: {
               Tip: {
                 // The pursePetname identifies which purse we want to use
-                pursePetname: 'Fun budget',
-                extent: 1,
+                pursePetname: selects.$tipPurse.value,
+                extent: Number($inputAmount.value),
               },
             },
             exit: { onDemand: null },
@@ -108,6 +114,7 @@ export default async function main() {
           type: 'walletAddOffer',
           data: offer
         });
+        alert('Please approve your tip, then close the wallet.')
       }
     });
     
