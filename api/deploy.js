@@ -11,6 +11,9 @@ import { makeGetInstanceHandle } from '@agoric/zoe/src/clientSupport';
 // spawner runs within ag-solo, so is persistent.  Once the deploy.js
 // script ends, connections to any of its objects are severed.
 
+// The deployer's wallet's petname for the tip issuer.
+const TIP_ISSUER_PETNAME = process.env.TIP_ISSUER_PETNAME || 'moola';
+
 /**
  * @typedef {Object} DeployPowers The special powers that `agoric deploy` gives us
  * @property {(path: string) => { moduleFormat: string, source: string }} bundleSource
@@ -99,9 +102,19 @@ export default async function deployApi(referencesPromise, { bundleSource, pathR
   // though. https://github.com/Agoric/agoric-sdk/issues/838
   const issuersArray = await E(wallet).getIssuers();
   const issuers = new Map(issuersArray);
-  const moolaIssuer = issuers.get('moola');
+  const tipIssuer = issuers.get(TIP_ISSUER_PETNAME);
 
-  const issuerKeywordRecord = harden({ Tip: moolaIssuer });
+  if (tipIssuer === undefined) {
+    console.error('Cannot find TIP_ISSUER_PETNAME', TIP_ISSUER_PETNAME, 'in home.wallet');
+    console.error('Have issuers:', [...issuers.keys()].join(', '));
+    process.exit(1);
+  }
+
+  // Find its brand registry key so we can communicate the issuer to other wallets.
+  // Equivalent to: await wallet~.getIssuerNames(tipIssuer)~.brandRegKey
+  const TIP_BRAND_REGKEY = await E.G(E(wallet).getIssuerNames(tipIssuer)).brandRegKey;
+
+  const issuerKeywordRecord = harden({ Tip: tipIssuer });
   const adminInvite = await E(zoe).makeInstance(encouragementContractInstallationHandle, issuerKeywordRecord);
   console.log('- SUCCESS! contract instance is running on Zoe');
   
@@ -146,6 +159,7 @@ export default async function deployApi(referencesPromise, { bundleSource, pathR
 
   console.log(`-- Contract Name: ${CONTRACT_NAME}`);
   console.log(`-- InstanceHandle Register Key: ${INSTANCE_REG_KEY}`);
+  console.log(`-- TIP_BRAND_REGKEY: ${TIP_BRAND_REGKEY}`)
 
   // We want the handler to run persistently. (Scripts such as this
   // deploy.js script are ephemeral and all connections to objects
@@ -168,6 +182,7 @@ export default async function deployApi(referencesPromise, { bundleSource, pathR
   const dappConstants = {
     INSTANCE_REG_KEY,
     // BRIDGE_URL: 'agoric-lookup:https://local.agoric.com?append=/bridge',
+    brandRegKeys: { Tip: TIP_BRAND_REGKEY },
     BRIDGE_URL: 'http://127.0.0.1:8000',
     API_URL: 'http://127.0.0.1:8000',
   };
