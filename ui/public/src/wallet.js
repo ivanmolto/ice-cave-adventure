@@ -2,10 +2,9 @@
 
 import dappConstants from '../lib/constants.js';
 
-// const { encouragement: encouragementBrandRegKey } =
-// dappConstants.brandRegKeys;
-
-const encouragementBrandRegKey = '';
+// TODO: Allow multiple brands for tipping.
+const { Tip: tipBrandRegKey } = dappConstants.brandRegKeys;
+const allowedBrandRegKeys = [tipBrandRegKey];
 
 /**
  * @typedef {Object.<string, HTMLOptionElement>} Purse
@@ -114,11 +113,9 @@ const updateOptions = (key, existing, currents, names, selects) => {
  * @param {Object.<string, HTMLSelectElement>} selects
  */
 export function walletUpdatePurses(purses, selects) {
-
-  // FIXME: Currently, we can only give moola tips.
-  allPurses = purses.filter( ({ issuerPetname }) => (issuerPetname === 'moola'));
-  // allPurses = purses.sort(({ pursePetname: a }, { pursePetname: b }) =>
-  //   cmp(a, b));
+  allPurses = purses.filter(
+    ({ brandRegKey }) => !allowedBrandRegKeys || allowedBrandRegKeys.includes(brandRegKey)
+  ).sort(({ pursePetname: a }, { pursePetname: b }) => cmp(a, b));
 
   const newIssuers = allPurses.sort(({ issuerPetname: a }, { issuerPetname: b }) =>
     cmp(a, b));
