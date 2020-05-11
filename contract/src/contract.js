@@ -18,7 +18,7 @@ export const makeContract = harden(zcf => {
   let adminOfferHandle;
   const tipAmountMath = zcf.getAmountMaths(harden(['Tip'])).Tip;
 
-  const { inviteAnOffer, rejectOffer } = makeZoeHelpers(zcf);
+  const { rejectOffer } = makeZoeHelpers(zcf);
 
   const updateNotification = () => {
     updater.updateState({ messages, count });
@@ -68,20 +68,10 @@ export const makeContract = harden(zcf => {
   };
 
   const makeInvite = () =>
-    inviteAnOffer(
-      harden({
-        offerHook: encouragementHook,
-        customProperties: { inviteDesc: 'encouragement' },
-      }),
-    );
+    zcf.makeInvitation(encouragementHook, 'encouragement');
 
   return harden({
-    invite: inviteAnOffer(
-      harden({
-        offerHook: adminHook,
-        customProperties: { inviteDesc: 'admin' },
-      }),
-    ),
+    invite: zcf.makeInvitation(adminHook, 'admin'),
     publicAPI: {
       getNotifier: () => notifier,
       makeInvite,
