@@ -1,8 +1,8 @@
 {
-  "name": "@agoric/dapp-encouragement-contract",
+  "name": "dapp-loot-boxes-contract",
   "version": "0.1.0",
   "private": true,
-  "description": "Contract for the dapp-encouragement Agoric Dapp",
+  "description": "Contract for the dapp-loot-boxes Agoric Dapp",
   "scripts": {
     "build": "exit 0",
     "test": "tape -r esm 'test/**/*.js' | tap-spec",
@@ -38,14 +38,14 @@
   "keywords": [],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Agoric/agoric"
+    "url": "git+https://github.com/ivanmolto/ice-cave-adventure"
   },
-  "author": "Agoric",
+  "author": "Ivan Molto",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Agoric/agoric/issues"
+    "url": "https://github.com/ivanmolto/ice-cave-adventure/issues"
   },
-  "homepage": "https://github.com/Agoric/agoric#readme",
+  "homepage": "https://github.com/ivanmolto/ice-cave-adventure#readme",
   "eslintConfig": {
     "extends": [
       "airbnb-base",
