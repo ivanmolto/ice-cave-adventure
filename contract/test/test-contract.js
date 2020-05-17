@@ -2,156 +2,439 @@
 import { test } from 'tape-promise/tape';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import bundleSource from '@agoric/bundle-source';
-
-import { E } from '@agoric/eventual-send';
 import harden from '@agoric/harden';
+import produceIssuer from '@agoric/ertp';
+import { E } from '@agoric/eventual-send';
 
 import { makeZoe } from '@agoric/zoe';
-import produceIssuer from '@agoric/ertp';
-import { makeGetInstanceHandle } from '@agoric/zoe/src/clientSupport';
 
 const contractPath = `${__dirname}/../src/contract`;
 
-test('contract with valid offers', async t => {
-  t.plan(10);
-  try {
-    // Outside of tests, we should use the long-lived Zoe on the
-    // testnet. In this test, we must create a new Zoe.
-    const zoe = makeZoe({ require });
+// __Test Scenario__
 
-    // Get the Zoe invite issuer from Zoe.
-    const inviteIssuer = await E(zoe).getInviteIssuer();
+// The Game Store plays the contract creator and the platform
+// It creates the contract for a game ("VoltAir Ice Cave", 3 loot boxes)
+// The Game Store wants 99 moolas per loot
 
-    // Make our helper functions.
-    const getInstanceHandle = makeGetInstanceHandle(inviteIssuer);
+// Alice buys loot #1
 
-    // Pack the contract.
-    const { source, moduleFormat } = await bundleSource(contractPath);
+// Then, the Joker tries malicious things:
+// - Joker tries to buy again loot #1 (and will fail)
+// - Joker tries to buy loot #2 for 1 moola (and will fail)
 
-    // Install the contract on Zoe, getting an installationHandle (an
-    // opaque identifier). We can use this installationHandle to look
-    // up the code we installed. Outside of tests, we can also send the
-    // installationHandle to someone else, and they can use it to
-    // create a new contract instance using the same code.
-    const installationHandle = await E(zoe).install(source, moduleFormat);
+// Then, Bob tries to buy loot 1 and fails. He buys loot #2 and #3
 
-    // Let's check the code. Outside of this test, we would probably
-    // want to check more extensively,
-    const code = await E(zoe).getInstallation(installationHandle);
-    t.ok(
-      code.includes(`This contract does a few interesting things.`),
-      `the code installed passes a quick check of what we intended to install`,
-    );
+// The Game Store is told about the game loots being sold out. It gets all the moolas from
+// the sale
 
-    // Make some mints/issuers just for our test.
-    const {
-      issuer: bucksIssuer,
-      mint: bucksMint,
-      amountMath: bucksAmountMath,
-    } = produceIssuer('bucks');
+test(`Zoe game loots contract`, async t => {
+  // Setup initial conditions
+  const {
+    mint: moolaMint,
+    issuer: moolaIssuer,
+    amountMath: { make: moola },
+  } = produceIssuer('moola');
 
-    // Let's give ourselves 5 bucks to start
-    const bucks5 = bucksAmountMath.make(5);
-    const bucksPayment = bucksMint.mintPayment(bucks5);
+  const zoe = makeZoe({ require });
+  const inviteIssuer = zoe.getInviteIssuer();
 
-    // Create the contract instance, using our new issuer.
-    const adminInvite = await E(zoe).makeInstance(installationHandle, {
-      Tip: bucksIssuer,
+  // === Initial Game Store part ===
+  const contractReadyP = bundleSource(contractPath).then(
+    ({ source, moduleFormat }) => {
+      const expectedAmountPerLoot = moola(99);
+
+      const installationHandle = zoe.install(source, moduleFormat);
+
+      return zoe
+        .makeInstance(installationHandle, harden({ Money: moolaIssuer }), {
+          game: 'VoltAir Ice Cave',
+          count: 3,
+          expectedAmountPerLoot,
+        })
+        .then(platformInvite => {
+          return inviteIssuer
+            .getAmountOf(platformInvite)
+            .then(({ extent: [{ instanceHandle: platformHandle }] }) => {
+              const { publicAPI } = zoe.getInstanceRecord(platformHandle);
+
+              t.equal(
+                typeof publicAPI.makeBuyerInvite,
+                'function',
+                'publicAPI.makeBuyerInvite should be a function',
+              );
+              t.equal(
+                typeof publicAPI.getLootIssuer,
+                'function',
+                'publicAPI.getLootIssuer should be a function',
+              );
+              t.equal(
+                typeof publicAPI.getAvailableLoots,
+                'function',
+                'publicAPI.getAvailableLoots should be a function',
+              );
+
+              // The platform makes an offer.
+              return (
+                // Note that the proposal here is empty
+                // This is due to a current limitation in proposal
+                // expressiveness:
+                // https://github.com/Agoric/agoric-sdk/issues/855
+                zoe
+                  .offer(platformInvite, harden({}))
+                  // completeObj exists because of a current limitation in @agoric/marshal : https://github.com/Agoric/agoric-sdk/issues/818
+                  .then(
+                    async ({
+                      outcome: platformOutcomeP,
+                      payout,
+                      completeObj: { complete },
+                      offerHandle,
+                    }) => {
+                      t.equal(
+                        await platformOutcomeP,
+                        `The offer has been accepted. Once the contract has been completed, please check your payout`,
+                        `default acceptance message`,
+                      );
+                      t.equal(
+                        typeof complete,
+                        'function',
+                        'complete should be a function',
+                      );
+
+                      const currentAllocation = await E(
+                        zoe,
+                      ).getCurrentAllocation(await offerHandle);
+
+                      t.equal(
+                        currentAllocation.Loot.extent.length,
+                        3,
+                        `the platform offerHandle should be associated with the 3 loots`,
+                      );
+
+                      return {
+                        publicAPI,
+                        gamePayout: payout,
+                        complete,
+                      };
+                    },
+                  )
+              );
+            });
+        });
+    },
+  );
+
+  const alicePartFinished = contractReadyP.then(({ publicAPI }) => {
+    const lootIssuer = publicAPI.getLootIssuer();
+    const lootAmountMath = lootIssuer.getAmountMath();
+
+    // === Alice part ===
+    // Alice starts with 300 moolas
+    const alicePurse = moolaIssuer.makeEmptyPurse();
+    alicePurse.deposit(moolaMint.mintPayment(moola(300)));
+
+    // Alice makes an invite
+    const aliceInvite = inviteIssuer.claim(publicAPI.makeBuyerInvite());
+    return inviteIssuer
+      .getAmountOf(aliceInvite)
+      .then(({ extent: [{ instanceHandle: aliceHandle }] }) => {
+        const { terms: termsOfAlice } = zoe.getInstanceRecord(aliceHandle);
+        // Alice checks terms
+        t.equal(termsOfAlice.game, 'VoltAir Ice Cave');
+        t.equal(termsOfAlice.expectedAmountPerLoot.brand, moola(99).brand);
+        t.equal(termsOfAlice.expectedAmountPerLoot.extent, moola(99).extent);
+
+        const availableLoots = publicAPI.getAvailableLoots();
+        // and sees the currently available tickets
+        t.equal(availableLoots.length, 3, 'Alice should see 3 available loots');
+        t.ok(
+          availableLoots.find(loot => loot.number === 1),
+          `availableLoots contains loot number 1`,
+        );
+        t.ok(
+          availableLoots.find(loot => loot.number === 2),
+          `availableLoots contains loot number 2`,
+        );
+        t.ok(
+          availableLoots.find(loot => loot.number === 3),
+          `availableLoots contains loot number 3`,
+        );
+
+        // find the extent corresponding to loot #1
+        const loot1Extent = availableLoots.find(loot => loot.number === 1);
+        // make the corresponding amount
+        const loot1Amount = lootAmountMath.make(harden([loot1Extent]));
+
+        const aliceProposal = harden({
+          give: { Money: termsOfAlice.expectedAmountPerLoot },
+          want: { Loot: loot1Amount },
+        });
+
+        const alicePaymentForLoot = alicePurse.withdraw(
+          termsOfAlice.expectedAmountPerLoot,
+        );
+
+        return zoe
+          .offer(aliceInvite, aliceProposal, {
+            Money: alicePaymentForLoot,
+          })
+          .then(({ payout: payoutP }) => {
+            return payoutP.then(alicePayout => {
+              return lootIssuer
+                .claim(alicePayout.Loot)
+                .then(aliceLootPayment => {
+                  return lootIssuer
+                    .getAmountOf(aliceLootPayment)
+                    .then(aliceBoughtLootAmount => {
+                      t.equal(
+                        aliceBoughtLootAmount.extent[0].game,
+                        'VoltAir Ice Cave',
+                        'Alice should have receieved the loot for the correct game',
+                      );
+                      t.equal(
+                        aliceBoughtLootAmount.extent[0].number,
+                        1,
+                        'Alice should have received the loot for the correct number',
+                      );
+                    });
+                });
+            });
+          });
+      });
+  });
+
+  const jokerPartFinished = Promise.all([
+    contractReadyP,
+    alicePartFinished,
+  ]).then(([{ publicAPI }]) => {
+    // === Joker part ===
+    const lootIssuer = publicAPI.getLootIssuer();
+    const lootAmountMath = lootIssuer.getAmountMath();
+
+    // Joker starts with 300 moolas
+    const jokerPurse = moolaIssuer.makeEmptyPurse();
+    jokerPurse.deposit(moolaMint.mintPayment(moola(300)));
+
+    // Joker attempts to buy loot 1 (and should fail)
+    const buyLoot1Attempt = Promise.resolve().then(() => {
+      const jokerInvite = inviteIssuer.claim(publicAPI.makeBuyerInvite());
+
+      return inviteIssuer
+        .getAmountOf(jokerInvite)
+        .then(({ extent: [{ instanceHandle: instanceHandleOfJoker }] }) => {
+          const { terms } = zoe.getInstanceRecord(instanceHandleOfJoker);
+
+          const { expectedAmountPerLoot: expectedAmountPerLootOfJoker } = terms;
+
+          // Joker does NOT check available tickets and tries to buy the loot
+          // number 1(already bought by Alice, but he doesn't know)
+          const loot1Amount = lootAmountMath.make(
+            harden([
+              {
+                game: terms.game,
+                number: 1,
+              },
+            ]),
+          );
+
+          const jokerProposal = harden({
+            give: { Money: expectedAmountPerLootOfJoker },
+            want: { Loot: loot1Amount },
+          });
+
+          const jokerPaymentForLoot = jokerPurse.withdraw(
+            expectedAmountPerLootOfJoker,
+          );
+
+          return zoe
+            .offer(jokerInvite, jokerProposal, {
+              Money: jokerPaymentForLoot,
+            })
+            .then(({ outcome, payout: payoutP }) => {
+              t.rejects(
+                outcome,
+                'performExchange from Joker should throw when trying to buy loot #1',
+              );
+
+              return payoutP.then(({ Loot, Money }) => {
+                return Promise.all([
+                  lootIssuer.getAmountOf(Loot),
+                  moolaIssuer.getAmountOf(Money),
+                ]).then(([jokerRefundLootAmount, jokerRefundMoneyAmount]) => {
+                  t.ok(
+                    lootAmountMath.isEmpty(jokerRefundLootAmount),
+                    'Joker should not receive loot #1',
+                  );
+                  t.equal(
+                    jokerRefundMoneyAmount.extent,
+                    99,
+                    'Joker should get a refund after trying to get loot #1',
+                  );
+                });
+              });
+            });
+        });
     });
 
-    // Check that we received an invite as the result of making the
-    // contract instance.
-    t.ok(
-      await E(inviteIssuer).isLive(adminInvite),
-      `an valid invite (an ERTP payment) was created`,
-    );
+    // Joker attempts to buy loot #2 for 1 moola (and should fail)
+    return buyLoot1Attempt.then(() => {
+      const jokerInvite = inviteIssuer.claim(publicAPI.makeBuyerInvite());
 
-    // Use the helper function to get an instanceHandle from the invite.
-    const instanceHandle = await getInstanceHandle(adminInvite);
+      return inviteIssuer
+        .getAmountOf(jokerInvite)
+        .then(({ extent: [{ instanceHandle: instanceHandleOfJoker }] }) => {
+          const { terms } = zoe.getInstanceRecord(instanceHandleOfJoker);
 
-    // Let's use the adminInvite to make an offer. This will allow us
-    // to remove our tips at the end
-    const {
-      payout: adminPayoutP,
-      outcome: adminOutcomeP,
-      cancelObj: { cancel: cancelAdmin },
-    } = await E(zoe).offer(adminInvite);
+          const loot2Amount = lootAmountMath.make(
+            harden([
+              {
+                game: terms.game,
+                number: 2,
+              },
+            ]),
+          );
 
-    t.equals(
-      await adminOutcomeP,
-      `admin invite redeemed`,
-      `admin outcome is correct`,
-    );
+          const jokerInsufficientAmount = moola(1);
 
-    // Let's test some of the publicAPI methods. The publicAPI is
-    // accessible to anyone who has access to Zoe and the
-    // instanceHandle. The publicAPI methods are up to the contract,
-    // and Zoe doesn't require contracts to have any particular
-    // publicAPI methods.
-    const instanceRecord = await E(zoe).getInstance(instanceHandle);
-    const { publicAPI } = instanceRecord;
+          const jokerProposal = harden({
+            give: { Money: jokerInsufficientAmount },
+            want: { Loot: loot2Amount },
+          });
 
-    const notifier = publicAPI.getNotifier();
-    const { value, updateHandle } = notifier.getUpdateSince();
-    const nextUpdateP = notifier.getUpdateSince(updateHandle);
+          const jokerInsufficientPaymentForLoot = jokerPurse.withdraw(
+            jokerInsufficientAmount,
+          );
 
-    // Count starts at 0
-    t.equals(value.count, 0, `count starts at 0`);
+          return zoe
+            .offer(jokerInvite, jokerProposal, {
+              Money: jokerInsufficientPaymentForLoot,
+            })
+            .then(({ outcome, payout }) => {
+              t.rejects(
+                outcome,
+                'outcome from Joker should throw when trying to buy a loot for 1 moola',
+              );
 
-    t.deepEquals(
-      value.messages,
-      harden({
-        basic: `You're doing great!`,
-        premium: `Wow, just wow. I have never seen such talent!`,
-      }),
-      `messages are as expected`,
-    );
+              return payout.then(({ Loot, Money }) => {
+                return Promise.all([
+                  lootIssuer.getAmountOf(Loot),
+                  moolaIssuer.getAmountOf(Money),
+                ]).then(([jokerRefundLootAmount, jokerRefundMoneyAmount]) => {
+                  t.ok(
+                    lootAmountMath.isEmpty(jokerRefundLootAmount),
+                    'Joker should not receive loot #2',
+                  );
+                  t.equal(
+                    jokerRefundMoneyAmount.extent,
+                    1,
+                    'Joker should get a refund after trying to get loot #2 for 1 moola',
+                  );
+                });
+              });
+            });
+        });
+    });
+  });
 
-    // Let's use the contract like a client and get some encouragement!
-    const encouragementInvite = await E(publicAPI).makeInvite();
+  const bobPartFinished = Promise.all([contractReadyP, jokerPartFinished]).then(
+    ([{ publicAPI }]) => {
+      // === Bob part ===
+      const lootIssuer = publicAPI.getLootIssuer();
+      const lootAmountMath = lootIssuer.getAmountMath();
 
-    const { outcome: encouragementP } = await E(zoe).offer(encouragementInvite);
+      // Bob starts with 300 moolas
+      const bobPurse = moolaIssuer.makeEmptyPurse();
+      bobPurse.deposit(moolaMint.mintPayment(moola(300)));
 
-    t.equals(
-      await encouragementP,
-      `You're doing great!`,
-      `encouragement matches expected`,
-    );
+      const availableLoots = publicAPI.getAvailableLoots();
 
-    // Getting encouragement resolves the 'nextUpdateP' promise
-    nextUpdateP.then(async result => {
-      t.equals(result.value.count, 1, 'count increments by 1');
+      // and sees the currently available tickets
+      t.equal(availableLoots.length, 2, 'Bob should see 2 available loots');
+      t.ok(
+        !availableLoots.find(loot => loot.number === 1),
+        `availableLoots should NOT contain loot number 1`,
+      );
+      t.ok(
+        availableLoots.find(loot => loot.number === 2),
+        `availableLoots should still contain loot number 2`,
+      );
+      t.ok(
+        availableLoots.find(loot => loot.number === 3),
+        `availableLoots should still contain loot number 3`,
+      );
 
-      // Now, let's get a premium encouragement message
-      const encouragementInvite2 = await E(publicAPI).makeInvite();
-      const proposal = harden({ give: { Tip: bucks5 } });
-      const paymentKeywordRecord = harden({
-        Tip: bucksPayment,
+      // Bob buys loots #2 and #3
+      const bobInvite = inviteIssuer.claim(publicAPI.makeBuyerInvite());
+
+      const loot2and3Amount = lootAmountMath.make(
+        harden([
+          availableLoots.find(loot => loot.number === 2),
+          availableLoots.find(loot => loot.number === 3),
+        ]),
+      );
+
+      const bobProposal = harden({
+        give: { Money: moola(2 * 99) },
+        want: { Loot: loot2and3Amount },
       });
-      const { outcome: secondEncouragementP } = await E(zoe).offer(
-        encouragementInvite2,
-        proposal,
-        paymentKeywordRecord,
-      );
+      const bobPaymentForLoot = bobPurse.withdraw(moola(2 * 99));
 
-      t.equals(
-        await secondEncouragementP,
-        `Wow, just wow. I have never seen such talent!`,
-        `premium message is as expected`,
-      );
+      return zoe
+        .offer(bobInvite, bobProposal, {
+          Money: bobPaymentForLoot,
+        })
+        .then(({ payout: payoutP }) => {
+          return payoutP.then(bobPayout => {
+            return lootIssuer
+              .getAmountOf(bobPayout.Loot)
+              .then(bobLootAmount => {
+                t.equal(
+                  bobLootAmount.extent.length,
+                  2,
+                  'Bob should have received 2 loots',
+                );
+                t.ok(
+                  bobLootAmount.extent.find(loot => loot.number === 2),
+                  'Bob should have received loot #2',
+                );
+                t.ok(
+                  bobLootAmount.extent.find(loot => loot.number === 3),
+                  'Bob should have received loot #3',
+                );
+              });
+          });
+        });
+    },
+  );
 
-      const newResult = notifier.getUpdateSince();
-      t.deepEquals(newResult.value.count, 2, `count is now 2`);
+  return Promise.all([contractReadyP, bobPartFinished])
+    .then(([{ publicAPI, gamePayout, complete }]) => {
+      // === Final Game Store part ===
+      // getting the money back
+      const availableLoots = publicAPI.getAvailableLoots();
 
-      // Let's get our Tips
-      cancelAdmin();
-      Promise.resolve(E.G(adminPayoutP).Tip).then(tip => {
-        bucksIssuer.getAmountOf(tip).then(tipAmount => {
-          t.deepEquals(tipAmount, bucks5, `payout is 5 bucks, all the tips`);
+      t.equal(availableLoots.length, 0, 'All the loots have been sold');
+
+      const gamePurse = moolaIssuer.makeEmptyPurse();
+
+      const done = gamePayout.then(payout => {
+        return payout.Money.then(moneyPayment => {
+          return gamePurse.deposit(moneyPayment);
+        }).then(() => {
+          t.equal(
+            gamePurse.getCurrentAmount().extent,
+            3 * 99,
+            `The Game Store should get ${3 * 99} moolas from loot sales`,
+          );
         });
       });
-    });
-  } catch (e) {
-    t.isNot(e, e, 'unexpected exception');
-  }
+
+      complete();
+
+      return done;
+    })
+    .catch(err => {
+      console.error('Error in last Game Store part', err);
+      t.fail('error');
+    })
+    .then(() => t.end());
 });
