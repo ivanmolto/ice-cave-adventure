@@ -1,85 +1,155 @@
+/* eslint-disable no-use-before-define */
 // @ts-check
+
 import harden from '@agoric/harden';
-import { produceNotifier } from '@agoric/notifier';
-import { makeZoeHelpers } from '@agoric/zoe/src/contractSupport/zoeHelpers';
+import produceIssuer from '@agoric/ertp';
+// import { produceNotifier } from '@agoric/notifier';
+import {
+  makeZoeHelpers,
+  defaultAcceptanceMsg,
+} from '@agoric/zoe/src/contractSupport/zoeHelpers';
 
-/**
- * This contract does a few interesting things.
- *
- * @type {import('@agoric/zoe').MakeContract}
- */
-export const makeContract = harden(zcf => {
-  let count = 0;
-  const messages = {
-    basic: `You're doing great!`,
-    premium: `Wow, just wow. I have never seen such talent!`,
-  };
-  const { notifier, updater } = produceNotifier();
-  let adminOfferHandle;
-  const tipAmountMath = zcf.getAmountMaths(harden(['Tip'])).Tip;
+// zcf is the Zoe Contract Facet, i.e. the contract-facing API of Zoe
+export const makeContract = harden(
+  /** @param {ContractFacet} zcf */ zcf => {
+    /*
+    const messages = {
+      purchase: `Thank you for your purchase! - VoltAir Loot`,
+    };
+    const { notifier, updater } = produceNotifier();
+    */
 
-  const { rejectOffer } = makeZoeHelpers(zcf);
+    // Create the internal Loot Box mint
+    const { issuer, mint, amountMath: lootAmountMath } = produceIssuer(
+      'Loot Boxes',
+      'set',
+    );
 
-  const updateNotification = () => {
-    updater.updateState({ messages, count });
-  };
-  updateNotification();
-
-  const adminHook = offerHandle => {
-    adminOfferHandle = offerHandle;
-    return `admin invite redeemed`;
-  };
-
-  const encouragementHook = offerHandle => {
-    // if the adminOffer is no longer active (i.e. the admin cancelled
-    // their offer and retrieved their tips), we just don't give any
-    // encouragement.
-    if (!zcf.isOfferActive(adminOfferHandle)) {
-      rejectOffer(offerHandle, `We are no longer giving encouragement`);
-    }
-
-    const userTipAllocation = zcf.getCurrentAllocation(offerHandle).Tip;
-    let encouragement = messages.basic;
-    // if the user gives a tip, we provide a premium encouragement message
-    if (
-      userTipAllocation &&
-      tipAmountMath.isGTE(userTipAllocation, tipAmountMath.make(1))
-    ) {
-      encouragement = messages.premium;
-      // reallocate the tip to the adminOffer
-      const adminTipAllocation = zcf.getCurrentAllocation(adminOfferHandle).Tip;
-      const newAdminAllocation = {
-        Tip: tipAmountMath.add(adminTipAllocation, userTipAllocation),
-      };
-      const newUserAllocation = {
-        Tip: tipAmountMath.getEmpty(),
-      };
-
-      zcf.reallocate(
-        harden([adminOfferHandle, offerHandle]),
-        harden([newAdminAllocation, newUserAllocation]),
-        harden(['Tip']),
-      );
-    }
-    zcf.complete(harden([offerHandle]));
-    count += 1;
+    /*
+    const updateNotification = () => {
+      updater.updateState({ messages });
+    };
     updateNotification();
-    return encouragement;
-  };
+    */
 
-  const makeInvite = () =>
-    zcf.makeInvitation(encouragementHook, 'encouragement');
+    const {
+      terms: { game, count, expectedAmountPerLoot },
+      issuerKeywordRecord: { Money: moneyIssuer },
+    } = zcf.getInstanceRecord();
 
-  return harden({
-    invite: zcf.makeInvitation(adminHook, 'admin'),
-    publicAPI: {
-      getNotifier: () => notifier,
-      makeInvite,
-      getFreeEncouragement: () => {
-        count += 1;
-        updateNotification();
-        return messages.basic;
-      },
-    },
-  });
-});
+    const { amountMath: moneyAmountMath } = zcf.getIssuerRecord(moneyIssuer);
+
+    const { rejectOffer, checkHook, escrowAndAllocateTo } = makeZoeHelpers(zcf);
+
+    let platformOfferHandle;
+
+    return zcf.addNewIssuer(issuer, 'Loot').then(() => {
+      const lootsAmount = lootAmountMath.make(
+        harden(
+          Array(count)
+            .fill()
+            .map((_, i) => {
+              const lootNumber = i + 1;
+              return harden({
+                game,
+                number: lootNumber,
+              });
+            }),
+        ),
+      );
+      const lootsPayment = mint.mintPayment(lootsAmount);
+
+      const platformOfferHook = offerHandle => {
+        platformOfferHandle = offerHandle;
+        return escrowAndAllocateTo({
+          amount: lootsAmount,
+          payment: lootsPayment,
+          keyword: 'Loot',
+          recipientHandle: platformOfferHandle,
+        }).then(() => defaultAcceptanceMsg);
+      };
+
+      const buyLootOfferHook = buyerOfferHandle => {
+        const buyerOffer = zcf.getOffer(buyerOfferHandle);
+
+        const currentPlatformAllocation = zcf.getCurrentAllocation(
+          platformOfferHandle,
+        );
+
+        /*
+        let purchaseMessage = messages.purchase;
+        */
+
+        const currentBuyerAllocation = zcf.getCurrentAllocation(
+          buyerOfferHandle,
+        );
+
+        const wantedLootsCount = buyerOffer.proposal.want.Loot.extent.length;
+        const wantedMoney = expectedAmountPerLoot.extent * wantedLootsCount;
+
+        try {
+          if (
+            !moneyAmountMath.isGTE(
+              currentBuyerAllocation.Money,
+              moneyAmountMath.make(wantedMoney),
+            )
+          ) {
+            throw new Error(
+              'The offer associated with this loot does not contain enough moolas',
+            );
+          }
+
+          const wantedPlatformAllocation = {
+            Money: moneyAmountMath.add(
+              currentPlatformAllocation.Money,
+              currentBuyerAllocation.Money,
+            ),
+            Loot: lootAmountMath.subtract(
+              currentPlatformAllocation.Loot,
+              buyerOffer.proposal.want.Loot,
+            ),
+          };
+
+          const wantedBuyerAllocation = {
+            Money: moneyAmountMath.getEmpty(),
+            Loot: lootAmountMath.add(
+              currentBuyerAllocation.Loot,
+              buyerOffer.proposal.want.Loot,
+            ),
+          };
+
+          zcf.reallocate(
+            [platformOfferHandle, buyerOfferHandle],
+            [wantedPlatformAllocation, wantedBuyerAllocation],
+          );
+          zcf.complete([buyerOfferHandle]);
+        } catch (err) {
+          // amounts don't match or reallocate certainly failed
+          rejectOffer(buyerOfferHandle);
+        }
+      };
+
+      const buyLootExpected = harden({
+        want: { Loot: null },
+        give: { Money: null },
+      });
+
+      return harden({
+        invite: zcf.makeInvitation(platformOfferHook, 'platform'),
+        publicAPI: {
+          makeBuyerInvite: () =>
+            zcf.makeInvitation(
+              checkHook(buyLootOfferHook, buyLootExpected),
+              'buy loot',
+            ),
+          getLootIssuer: () => issuer,
+          getAvailableLoots() {
+            // Because of a technical limitation in @agoric/marshal, an array of extents
+            // is better than a Map https://github.com/Agoric/agoric-sdk/issues/838
+            return zcf.getCurrentAllocation(platformOfferHandle).Loot.extent;
+          },
+        },
+      });
+    });
+  },
+);
