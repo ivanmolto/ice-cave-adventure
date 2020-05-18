@@ -22,7 +22,7 @@ export default async function deployShutdown(referencesPromise, { bundleSource, 
   const moolaPurse = await E(wallet).getPurse('Fun budget');
   adminPayoutP.then(async payout => {
     const moolaPayment = await payout.Tip;
-    console.log('tip payment in moola received. Depositing now.');
+    console.log('payment in moola received. Depositing now.');
     try {
       await E(moolaPurse).deposit(moolaPayment);
     } catch (e) {
