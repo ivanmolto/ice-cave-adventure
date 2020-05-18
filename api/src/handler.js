@@ -16,7 +16,7 @@ export default harden(({ publicAPI, http }, _inviteMaker) => {
 
   const fail = e => {
     const obj = {
-      type: 'encouragement/encouragedError',
+      type: 'voltair/Error',
       data: (e && e.message) || e
     };
     sendToSubscribers(obj);
@@ -25,7 +25,7 @@ export default harden(({ publicAPI, http }, _inviteMaker) => {
   const doOneNotification = updateResponse => {
     // Publish to our subscribers.
     const obj = {
-      type: 'encouragement/encouragedResponse',
+      type: 'voltair/Response',
       data: updateResponse.value,
     };
     sendToSubscribers(obj);
@@ -59,19 +59,19 @@ export default harden(({ publicAPI, http }, _inviteMaker) => {
         async onMessage(obj, { channelHandle }) {
           // These are messages we receive from either POST or WebSocket.
           switch (obj.type) {
-            case 'encouragement/getEncouragement': {
+            case 'voltair/getLoot': {
               
               return harden({
-                type: 'encouragement/getEncouragementResponse',
+                type: 'voltair/getLootResponse',
                 instanceRegKey: undefined,
-                data: await E(publicAPI).getFreeEncouragement(),
+                data: await E(publicAPI).getLoot(),
               });
             }
-
-            case 'encouragement/subscribeNotifications': {
+            
+            case 'voltair/subscribeNotifications': {
               
               return harden({
-                type: 'encouragement/subscribeNotificationsResponse',
+                type: 'voltair/subscribeNotificationsResponse',
                 data: true,
               });
             }
