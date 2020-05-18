@@ -12,8 +12,8 @@ import { E } from '@agoric/eventual-send';
 // spawner runs within ag-solo, so is persistent.  Once the deploy.js
 // script ends, connections to any of its objects are severed.
 
-const LOOT_ISSUER_PETNAME = 'voltair';
-const LOOT_PURSE_PETNAME = 'Account';
+const LOOT_ISSUER_PETNAME = 'VoltAir';
+const LOOT_PURSE_PETNAME = 'Game Account';
 
 // The contract's registry key for the assurance issuer.
 const {
