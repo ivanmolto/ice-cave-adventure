@@ -53,6 +53,7 @@ export const makeContract = harden(
               return harden({
                 game,
                 number: lootNumber,
+                price: expectedAmountPerLoot.extent,
               });
             }),
         ),
