@@ -22,11 +22,25 @@ Once there install the JavaScript dependencies with the following command in the
 Then start the Agoric VM in the terminal with the command:
 `agoric start --reset`
 
+Open another shell and enter the command:
+`agoric deploy ./contract/deploy.js ./api/deploy.js ./ui/deploy.js`
 
+Open another shell to deploy the frontend, go to the ui folder and install the NPM dependencies:
+```
+cd ui
+npm install
+```
+To launch the Phaser development server with the following command in the terminal:
+`npm start`
+
+Go to a browser and open `http://localhost:8080` to see the game and `http://localhost:8 to see and interact with the wallet.
 
 To learn more about how to build Agoric Dapps, please see the [Dapp Guide](https://agoric.com/documentation/dapps/).
 
 
+## Test
+Test the contract with the following command in the terminal:
+`yarn test`
 
 
 ## Roles in the arrangement
