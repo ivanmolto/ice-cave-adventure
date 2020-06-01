@@ -27,13 +27,15 @@ Open another shell and enter the command:
 
 Open another shell to deploy the frontend, go to the ui folder and install the NPM dependencies:
 ```
-cd ui
+cd ui/public/sr
 npm install
 ```
-To launch the Phaser development server with the following command in the terminal:
-`npm start`
-
-Go to a browser and open `http://localhost:8080` to see the game and `http://localhost:8 to see and interact with the wallet.
+Launch the Phaser development server with the following command in the terminal:
+```
+npm run build
+npm run start
+```
+Go to a browser and open `http://localhost:3000` to see the game and `http://localhost:8000` to see and interact with the wallet.
 
 To learn more about how to build Agoric Dapps, please see the [Dapp Guide](https://agoric.com/documentation/dapps/).
 
