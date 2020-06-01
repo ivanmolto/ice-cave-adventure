@@ -1,0 +1,30 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "Client side code a Phaser game",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "npx webpack --mode production",
+    "start": "npm run build && npx webpack-dev-server --port=3000 --mode development",
+    "lint": "npx eslint src/ --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ivan Molto",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.10.1",
+    "@babel/preset-env": "^7.10.1",
+    "babel-loader": "^8.1.0",
+    "eslint": "^7.1.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "raw-loader": "^4.0.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "phaser": "^3.23.0",
+    "uuid": "^8.1.0"
+  }
+}
