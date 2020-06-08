@@ -6,7 +6,12 @@ export default class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.spritesheet('loading', 'assets/images/loading.png', { frameWidth: 128, frameHeight: 128 });
+    // TODO: Evaluate to pack texture 'game_loading.jpg'
+    this.load.image('game_loading', 'assets/images/game_loading.jpg');
+    this.load.spritesheet('loading', 'assets/images/loading.png', {
+      frameWidth: 128,
+      frameHeight: 128,
+    });
   }
 
   create() {
