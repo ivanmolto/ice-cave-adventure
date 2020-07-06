@@ -1,0 +1,104 @@
+{
+	"textures": [
+		{
+			"image": "title_sprites.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 785,
+				"h": 1712
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "ice_cave_teaser",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 800,
+						"h": 800
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 8,
+						"w": 783,
+						"h": 783
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 783,
+						"h": 783
+					}
+				},
+				{
+					"filename": "store_teaser",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 800,
+						"h": 800
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 8,
+						"w": 783,
+						"h": 783
+					},
+					"frame": {
+						"x": 1,
+						"y": 786,
+						"w": 783,
+						"h": 783
+					}
+				},
+				{
+					"filename": "shop_blurb",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 450,
+						"h": 140
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 450,
+						"h": 140
+					},
+					"frame": {
+						"x": 1,
+						"y": 1571,
+						"w": 450,
+						"h": 140
+					}
+				},
+				{
+					"filename": "ice_cave_blurb",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 250,
+						"h": 124
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 250,
+						"h": 124
+					},
+					"frame": {
+						"x": 453,
+						"y": 1571,
+						"w": 250,
+						"h": 124
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:0d41f097793be08c5cd2363de6e2a89f:269af8aea248639f315a12a05b04f841:85df62468b6f7b1254741f0c3f05d40f$"
+	}
+}
