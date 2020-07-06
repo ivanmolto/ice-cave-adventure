@@ -1,0 +1,251 @@
+{
+	"textures": [
+		{
+			"image": "store_sprites.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 963,
+				"h": 1728
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "promo",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 420,
+						"h": 672
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 420,
+						"h": 672
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 420,
+						"h": 672
+					}
+				},
+				{
+					"filename": "loot_box_2_asteroid",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 512,
+						"h": 512
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 510,
+						"h": 511
+					},
+					"frame": {
+						"x": 423,
+						"y": 1,
+						"w": 510,
+						"h": 511
+					}
+				},
+				{
+					"filename": "loot_box_3_asteroid",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 512,
+						"h": 512
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 510,
+						"h": 511
+					},
+					"frame": {
+						"x": 1,
+						"y": 675,
+						"w": 510,
+						"h": 511
+					}
+				},
+				{
+					"filename": "loot_box_1_asteroid",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 512,
+						"h": 512
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 3,
+						"w": 509,
+						"h": 509
+					},
+					"frame": {
+						"x": 1,
+						"y": 1188,
+						"w": 509,
+						"h": 509
+					}
+				},
+				{
+					"filename": "lock",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 400,
+						"h": 507
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 400,
+						"h": 507
+					},
+					"frame": {
+						"x": 513,
+						"y": 514,
+						"w": 400,
+						"h": 507
+					}
+				},
+				{
+					"filename": "ertp-and-zoe",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 340,
+						"h": 230
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 0,
+						"w": 338,
+						"h": 230
+					},
+					"frame": {
+						"x": 513,
+						"y": 1023,
+						"w": 338,
+						"h": 230
+					}
+				},
+				{
+					"filename": "loot_box_1",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 450,
+						"h": 140
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 450,
+						"h": 140
+					},
+					"frame": {
+						"x": 512,
+						"y": 1255,
+						"w": 450,
+						"h": 140
+					}
+				},
+				{
+					"filename": "loot_box_2",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 450,
+						"h": 140
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 450,
+						"h": 140
+					},
+					"frame": {
+						"x": 512,
+						"y": 1397,
+						"w": 450,
+						"h": 140
+					}
+				},
+				{
+					"filename": "loot_box_3",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 450,
+						"h": 140
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 450,
+						"h": 140
+					},
+					"frame": {
+						"x": 512,
+						"y": 1539,
+						"w": 450,
+						"h": 140
+					}
+				},
+				{
+					"filename": "joker_blurb",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 300,
+						"h": 46
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 300,
+						"h": 46
+					},
+					"frame": {
+						"x": 512,
+						"y": 1681,
+						"w": 300,
+						"h": 46
+					}
+				},
+				{
+					"filename": "joker",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 128,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 19,
+						"y": 0,
+						"w": 97,
+						"h": 85
+					},
+					"frame": {
+						"x": 853,
+						"y": 1023,
+						"w": 97,
+						"h": 85
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:3740e95e4055d7924ae494f56f1203e0:65554acd17f90021437ae4f0e34993f8:577415dd463e34bea8232b640e6a7ff0$"
+	}
+}
