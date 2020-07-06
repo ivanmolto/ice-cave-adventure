@@ -1,0 +1,314 @@
+{
+	"textures": [
+		{
+			"image": "buttons_sprites.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 789,
+				"h": 499
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "hud_bg.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 286,
+						"h": 295
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 286,
+						"h": 295
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 286,
+						"h": 295
+					}
+				},
+				{
+					"filename": "buy_button_state_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 400,
+						"h": 100
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 1,
+						"w": 392,
+						"h": 99
+					},
+					"frame": {
+						"x": 1,
+						"y": 298,
+						"w": 392,
+						"h": 99
+					}
+				},
+				{
+					"filename": "buy_button_state_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 400,
+						"h": 100
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 1,
+						"w": 392,
+						"h": 99
+					},
+					"frame": {
+						"x": 1,
+						"y": 399,
+						"w": 392,
+						"h": 99
+					}
+				},
+				{
+					"filename": "start_button_state_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 400,
+						"h": 100
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 1,
+						"w": 392,
+						"h": 99
+					},
+					"frame": {
+						"x": 289,
+						"y": 1,
+						"w": 392,
+						"h": 99
+					}
+				},
+				{
+					"filename": "start_button_state_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 400,
+						"h": 100
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 1,
+						"w": 392,
+						"h": 99
+					},
+					"frame": {
+						"x": 289,
+						"y": 102,
+						"w": 392,
+						"h": 99
+					}
+				},
+				{
+					"filename": "musicOn_h.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 105,
+						"h": 111
+					},
+					"spriteSourceSize": {
+						"x": 24,
+						"y": 14,
+						"w": 67,
+						"h": 88
+					},
+					"frame": {
+						"x": 289,
+						"y": 203,
+						"w": 67,
+						"h": 88
+					}
+				},
+				{
+					"filename": "musicOn.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 105,
+						"h": 111
+					},
+					"spriteSourceSize": {
+						"x": 24,
+						"y": 14,
+						"w": 67,
+						"h": 87
+					},
+					"frame": {
+						"x": 358,
+						"y": 203,
+						"w": 67,
+						"h": 87
+					}
+				},
+				{
+					"filename": "store_button_state_01.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 400,
+						"h": 100
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 1,
+						"w": 392,
+						"h": 99
+					},
+					"frame": {
+						"x": 395,
+						"y": 292,
+						"w": 392,
+						"h": 99
+					}
+				},
+				{
+					"filename": "store_button_state_02.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 400,
+						"h": 100
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 1,
+						"w": 392,
+						"h": 99
+					},
+					"frame": {
+						"x": 395,
+						"y": 393,
+						"w": 392,
+						"h": 99
+					}
+				},
+				{
+					"filename": "back.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 75,
+						"h": 74
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 75,
+						"h": 74
+					},
+					"frame": {
+						"x": 427,
+						"y": 203,
+						"w": 75,
+						"h": 74
+					}
+				},
+				{
+					"filename": "back_h.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 75,
+						"h": 74
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 75,
+						"h": 74
+					},
+					"frame": {
+						"x": 504,
+						"y": 203,
+						"w": 75,
+						"h": 74
+					}
+				},
+				{
+					"filename": "pause_h.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 61,
+						"h": 66
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 61,
+						"h": 66
+					},
+					"frame": {
+						"x": 581,
+						"y": 203,
+						"w": 61,
+						"h": 66
+					}
+				},
+				{
+					"filename": "musicOff.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 105,
+						"h": 111
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 105,
+						"h": 111
+					},
+					"frame": {
+						"x": 683,
+						"y": 1,
+						"w": 105,
+						"h": 111
+					}
+				},
+				{
+					"filename": "musicOff_h.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 105,
+						"h": 111
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 105,
+						"h": 111
+					},
+					"frame": {
+						"x": 683,
+						"y": 114,
+						"w": 105,
+						"h": 111
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:c801e8b5bbc2cacb191634d4426fa00c:3a41d90c219371b5338432714f151049:f9ab428837aa60fe930ba73201e8a0db$"
+	}
+}
