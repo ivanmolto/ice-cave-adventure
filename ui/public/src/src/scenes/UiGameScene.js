@@ -10,6 +10,22 @@ export default class UiScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.text(0, 0, 'This is a placeholder to check the UiGameScene');
+    this.setupUiElements();
+  }
+
+  setupUiElements() {
+    // this.scoreText = this.add.text(35, 8, 'Snowflakes: 0', {
+    //  fontSize: '25px',
+    //  fill: '#ffffff',
+    // });
+    this.snowflakeImage = this.add
+      .image(100, 980, 'snowflake_green')
+      .setScale(1.5);
+  }
+
+  setupEvents() {
+    this.gameScene.events.on('updateScore', score => {
+      this.scoreText.setText(`Snowflakes: ${score}`);
+    });
   }
 }
