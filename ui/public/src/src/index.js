@@ -1,18 +1,16 @@
 import * as Phaser from 'phaser';
 import scenes from './scenes/scenes';
+import Model from './Model';
 
 const config = {
   type: Phaser.AUTO,
-  width: 1280,
-  height: 720,
+  width: 1920,
+  height: 1080,
   scene: scenes,
   physics: {
-    default: 'arcade',
-    arcade: {
-      debug: false,
-      gravity: {
-        y: 0,
-      },
+    default: 'matter',
+    matter: {
+      debug: true,
     },
   },
   roundPixels: true,
@@ -21,6 +19,8 @@ const config = {
 class Game extends Phaser.Game {
   constructor() {
     super(config);
+    const model = new Model();
+    this.globals = { model };
     this.scene.start('Boot');
   }
 }
